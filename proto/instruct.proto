@@ -13,7 +13,7 @@ service Instruct {
 
 message InstructReq {
   InstructType instruct_type = 1;
-  repeated string message = 2;
+  string instruct = 2;
 }
 
 message InstructResp {
