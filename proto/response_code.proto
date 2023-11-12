@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package response;
+package response_code;
 
 enum RespCode {
   UNKNOWN_ERROR = 0;

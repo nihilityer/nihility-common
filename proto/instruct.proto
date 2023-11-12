@@ -20,5 +20,5 @@ message InstructReq {
 
 message InstructResp {
   bool status = 1;
-  response.RespCode resp_code = 2;
+  response_code.RespCode resp_code = 2;
 }
