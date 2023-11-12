@@ -1,5 +1,7 @@
 syntax = "proto3";
 
+import public "response_code.proto";
+
 package instruct;
 
 enum InstructType {
@@ -18,4 +20,5 @@ message InstructReq {
 
 message InstructResp {
   bool status = 1;
+  response.RespCode resp_code = 2;
 }

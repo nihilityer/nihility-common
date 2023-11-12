@@ -1,5 +1,7 @@
 syntax = "proto3";
 
+import public "response_code.proto";
+
 package manipulate;
 
 enum ManipulateType {
@@ -13,9 +15,11 @@ service Manipulate {
 
 message ManipulateReq {
   ManipulateType manipulate_type = 1;
-  string command = 2;
+  string use_module_name = 2;
+  string command = 3;
 }
 
 message ManipulateResp {
   bool status = 1;
+  response.RespCode resp_code = 2;
 }

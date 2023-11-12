@@ -1,0 +1,9 @@
+syntax = "proto3";
+
+package response;
+
+enum RespCode {
+  UNKNOWN_ERROR = 0;
+  SUCCESS = 1;
+  UNABLE_TO_PROCESS = 2;
+}

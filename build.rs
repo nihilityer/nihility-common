@@ -4,7 +4,8 @@ fn main() {
             &[
                 "proto/manipulate.proto",
                 "proto/instruct.proto",
-                "proto/module_info.proto",
+                "proto/sub_module.proto",
+                "proto/response_code.proto",
             ],
             &["proto"],
         )
