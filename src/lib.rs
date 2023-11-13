@@ -6,7 +6,7 @@ pub mod instruct {
     tonic::include_proto!("instruct");
 }
 
-pub mod module_info {
+pub mod sub_module {
     tonic::include_proto!("sub_module");
 }
 
