@@ -7,6 +7,7 @@ package sub_module;
 service SubModule {
   rpc register (ModuleInfo) returns (SubModuleResp) {}
   rpc offline (ModuleInfo) returns (SubModuleResp) {}
+  rpc keep_alive (ModuleInfo) returns (SubModuleResp) {}
 }
 
 enum SubModuleType {
@@ -17,7 +18,7 @@ enum SubModuleType {
 
 message ModuleInfo {
   string name = 1;
-  SubModuleType client_type = 2;
+  SubModuleType sub_module_type = 2;
   repeated string addr = 3;
   repeated string default_instruct = 4;
 }
