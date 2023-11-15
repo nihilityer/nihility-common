@@ -7,6 +7,10 @@ package manipulate;
 enum ManipulateType {
   DEFAULT_TYPE = 0;
   SPECIAL_TYPE = 1;
+  OFFLINE_TYPE = 2;
+  DISCONTINUE_TYPE = 3;
+  CANCEL_TYPE = 4;
+  CONFIRM_TYPE = 5;
 }
 
 service Manipulate {
