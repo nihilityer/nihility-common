@@ -6,8 +6,8 @@ pub mod instruct {
     tonic::include_proto!("instruct");
 }
 
-pub mod sub_module {
-    tonic::include_proto!("sub_module");
+pub mod submodule {
+    tonic::include_proto!("submodule");
 }
 
 pub mod response_code {

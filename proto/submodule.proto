@@ -1,0 +1,30 @@
+syntax = "proto3";
+
+import public "response_code.proto";
+
+package submodule;
+
+service Submodule {
+  rpc register (SubmoduleReq) returns (SubModuleResp) {}
+  rpc offline (SubmoduleReq) returns (SubModuleResp) {}
+  rpc keep_alive (SubmoduleReq) returns (SubModuleResp) {}
+  rpc update (SubmoduleReq) returns (SubModuleResp) {}
+}
+
+enum SubmoduleType {
+  GRPC_TYPE = 0;
+  PIPE_TYPE = 1;
+  WINDOWS_NAMED_PIPE_TYPE = 2;
+}
+
+message SubmoduleReq {
+  string name = 1;
+  SubmoduleType submodule_type = 2;
+  map<string, string> conn_params = 3;
+  repeated string default_instruct = 4;
+}
+
+message SubModuleResp {
+  bool success = 1;
+  response_code.RespCode resp_code = 2;
+}
