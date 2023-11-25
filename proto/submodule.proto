@@ -7,7 +7,7 @@ package submodule;
 service Submodule {
   rpc register (SubmoduleReq) returns (SubModuleResp) {}
   rpc offline (SubmoduleReq) returns (SubModuleResp) {}
-  rpc keep_alive (SubmoduleReq) returns (SubModuleResp) {}
+  rpc heartbeat (SubmoduleReq) returns (SubModuleResp) {}
   rpc update (SubmoduleReq) returns (SubModuleResp) {}
 }
 
@@ -15,6 +15,7 @@ enum SubmoduleType {
   GRPC_TYPE = 0;
   PIPE_TYPE = 1;
   WINDOWS_NAMED_PIPE_TYPE = 2;
+  HTTP_TYPE = 3;
 }
 
 message SubmoduleReq {
