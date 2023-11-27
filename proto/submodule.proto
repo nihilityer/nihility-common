@@ -18,11 +18,18 @@ enum SubmoduleType {
   HTTP_TYPE = 3;
 }
 
+enum ReceiveType {
+  DEFAULT_TYPE = 0;
+  JUST_INSTRUCT_TYPE = 1;
+  JUST_MANIPULATE_TYPE = 2;
+}
+
 message SubmoduleReq {
   string name = 1;
   SubmoduleType submodule_type = 2;
-  map<string, string> conn_params = 3;
-  repeated string default_instruct = 4;
+  ReceiveType receive_type = 3;
+  map<string, string> conn_params = 4;
+  repeated string default_instruct = 5;
 }
 
 message SubModuleResp {

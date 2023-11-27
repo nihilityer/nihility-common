@@ -16,6 +16,7 @@ service Instruct {
 message InstructReq {
   InstructType instruct_type = 1;
   string instruct = 2;
+  string receive_manipulate_submodule = 3;
 }
 
 message InstructResp {
