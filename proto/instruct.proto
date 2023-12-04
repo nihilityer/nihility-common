@@ -12,7 +12,7 @@ enum InstructType {
 
 service Instruct {
   rpc SendTextInstruct (TextInstruct) returns (response_code.Resp) {}
-  rpc SendTextInstructStream (stream TextInstruct) returns (stream response_code.Resp) {}
+  rpc SendMultipleTextInstruct (stream TextInstruct) returns (stream response_code.Resp) {}
 }
 
 message InstructInfo {

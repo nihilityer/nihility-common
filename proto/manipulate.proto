@@ -17,7 +17,7 @@ enum ManipulateType {
 service Manipulate {
   rpc SendSimpleManipulate (SimpleManipulate) returns (response_code.Resp) {}
   rpc SendTextDisplayManipulate (TextDisplayManipulate) returns (response_code.Resp) {}
-  rpc SendTextDisplayManipulateStream (stream TextDisplayManipulate) returns (stream response_code.Resp) {}
+  rpc SendMultipleTextDisplayManipulate (stream TextDisplayManipulate) returns (stream response_code.Resp) {}
 }
 
 message ManipulateInfo {
