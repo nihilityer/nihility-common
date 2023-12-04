@@ -7,3 +7,7 @@ enum RespCode {
   SUCCESS = 1;
   UNABLE_TO_PROCESS = 2;
 }
+
+message Resp {
+  RespCode code = 1;
+}

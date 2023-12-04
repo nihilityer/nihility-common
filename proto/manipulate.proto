@@ -11,19 +11,25 @@ enum ManipulateType {
   DISCONTINUE_TYPE = 3;
   CANCEL_TYPE = 4;
   CONFIRM_TYPE = 5;
+  WAIT_NEXT_TYPE = 6;
 }
 
 service Manipulate {
-  rpc send_manipulate (ManipulateReq) returns (ManipulateResp) {}
+  rpc SendSimpleManipulate (SimpleManipulate) returns (response_code.Resp) {}
+  rpc SendTextDisplayManipulate (TextDisplayManipulate) returns (response_code.Resp) {}
+  rpc SendTextDisplayManipulateStream (stream TextDisplayManipulate) returns (stream response_code.Resp) {}
 }
 
-message ManipulateReq {
+message ManipulateInfo {
   ManipulateType manipulate_type = 1;
   string use_module_name = 2;
-  string command = 3;
 }
 
-message ManipulateResp {
-  bool status = 1;
-  response_code.RespCode resp_code = 2;
+message SimpleManipulate {
+  ManipulateInfo info = 1;
+}
+
+message TextDisplayManipulate {
+  ManipulateInfo info = 1;
+  string text = 2;
 }

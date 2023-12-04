@@ -7,19 +7,20 @@ package instruct;
 enum InstructType {
   DEFAULT_TYPE = 0;
   SPECIAL_TYPE = 1;
+  WAIT_NEXT_TYPE = 2;
 }
 
 service Instruct {
-  rpc send_instruct (InstructReq) returns (InstructResp) {}
+  rpc SendTextInstruct (TextInstruct) returns (response_code.Resp) {}
+  rpc SendTextInstructStream (stream TextInstruct) returns (stream response_code.Resp) {}
 }
 
-message InstructReq {
+message InstructInfo {
   InstructType instruct_type = 1;
-  string instruct = 2;
   string receive_manipulate_submodule = 3;
 }
 
-message InstructResp {
-  bool status = 1;
-  response_code.RespCode resp_code = 2;
+message TextInstruct {
+  InstructInfo info = 1;
+  string instruct = 2;
 }

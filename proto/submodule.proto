@@ -5,10 +5,10 @@ import public "response_code.proto";
 package submodule;
 
 service Submodule {
-  rpc register (SubmoduleReq) returns (SubModuleResp) {}
-  rpc offline (SubmoduleReq) returns (SubModuleResp) {}
-  rpc heartbeat (SubmoduleReq) returns (SubModuleResp) {}
-  rpc update (SubmoduleReq) returns (SubModuleResp) {}
+  rpc Register (SubmoduleReq) returns (response_code.Resp) {}
+  rpc Offline (SubmoduleReq) returns (response_code.Resp) {}
+  rpc Heartbeat (SubmoduleReq) returns (response_code.Resp) {}
+  rpc Update (SubmoduleReq) returns (response_code.Resp) {}
 }
 
 enum SubmoduleType {
@@ -30,9 +30,4 @@ message SubmoduleReq {
   ReceiveType receive_type = 3;
   map<string, string> conn_params = 4;
   repeated string default_instruct = 5;
-}
-
-message SubModuleResp {
-  bool success = 1;
-  response_code.RespCode resp_code = 2;
 }
