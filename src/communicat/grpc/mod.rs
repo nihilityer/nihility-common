@@ -12,8 +12,6 @@ mod client;
 mod server;
 mod config;
 
-const GRPC_CONN_ADDR_FIELD: &str = "grpc_addr";
-
 pub(super) fn start(
     grpc_config: GrpcConfig,
     communicat_status_sender: UnboundedSender<String>,

@@ -24,6 +24,8 @@ pub enum NihilityCommonError {
     AddrParse(#[from] AddrParseError),
     #[error("Tonic Transport Error")]
     Tonic(#[from] tonic::transport::Error),
+    #[error("Tonic Status")]
+    Status(#[from] tonic::Status),
     #[error("Unknown Error")]
     Unknown,
 }

@@ -1,4 +1,4 @@
-use crate::error::NihilityCommonError::CreateManipulate;
+use crate::error::NihilityCommonError::CreateManipulateReq;
 use crate::error::WrapResult;
 use crate::manipulate::{ManipulateInfo, ManipulateType, SimpleManipulate, TextDisplayManipulate};
 
@@ -63,7 +63,7 @@ impl ManipulateEntity {
                     info: Some(info.create_req_info()),
                 }),
             },
-            data_type => Err(CreateManipulate(data_type)),
+            data_type => Err(CreateManipulateReq(data_type)),
         }
     }
 
@@ -79,7 +79,7 @@ impl ManipulateEntity {
                     text: manipulate,
                 }),
             },
-            data_type => Err(CreateManipulate(data_type)),
+            data_type => Err(CreateManipulateReq(data_type)),
         }
     }
 }

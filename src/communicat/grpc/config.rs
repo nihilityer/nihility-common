@@ -25,7 +25,8 @@ impl Default for GrpcConfig {
                     Ok(ipv4) => ipv4,
                     Err(e) => {
                         error!("get ipv4 addr error: {:?}", e);
-                        IpAddr::from_str("127.0.0.1").unwrap();
+                        let ip = IpAddr::from_str("127.0.0.1").unwrap();
+                        ip
                     }
                 }
             }
