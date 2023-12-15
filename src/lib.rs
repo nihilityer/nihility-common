@@ -7,6 +7,10 @@ mod error;
 
 pub(crate) static CANCELLATION_TOKEN: OnceLock<CancellationToken> = OnceLock::new();
 
+pub(crate) static DEFAULT_RECEIVER_SUBMODULE_NAME: OnceLock<String> = OnceLock::new();
+
+pub(crate) static DEFAULT_INSTRUCT_HANDLER_SUBMODULE_NAME: OnceLock<String> = OnceLock::new();
+
 pub(crate) mod manipulate {
     tonic::include_proto!("manipulate");
 }

@@ -1,5 +1,6 @@
 mod grpc;
 mod mock;
+mod client;
 
 use tokio::sync::mpsc::Receiver;
 use tonic::async_trait;
@@ -10,7 +11,7 @@ use crate::response_code::RespCode;
 
 /// 发送指令特征
 #[async_trait]
-pub trait SendInstructOperate {
+pub(self) trait SendInstructOperate {
     async fn send_text(&mut self, instruct: TextInstruct) -> WrapResult<RespCode>;
     async fn send_multiple_text(
         &mut self,
@@ -20,7 +21,7 @@ pub trait SendInstructOperate {
 
 /// 发送操作特征
 #[async_trait]
-pub trait SendManipulateOperate {
+pub(self) trait SendManipulateOperate {
     async fn send_simple(&mut self, manipulate: SimpleManipulate) -> WrapResult<RespCode>;
     async fn send_text_display(&mut self, manipulate: TextDisplayManipulate) -> WrapResult<RespCode>;
     async fn send_multiple_text_display(
