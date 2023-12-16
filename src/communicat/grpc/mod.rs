@@ -3,7 +3,7 @@ use tokio::sync::mpsc::UnboundedSender;
 use tracing::error;
 
 use crate::CANCELLATION_TOKEN;
-use crate::communicat::grpc::config::GrpcConfig;
+pub use crate::communicat::grpc::config::GrpcConfig;
 use crate::entity::instruct::InstructEntity;
 use crate::entity::manipulate::ManipulateEntity;
 use crate::entity::submodule::ModuleOperate;

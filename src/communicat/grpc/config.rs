@@ -1,9 +1,11 @@
 use std::net::IpAddr;
+use std::path::Path;
 use std::str::FromStr;
 
 use local_ip_address::{local_ip, local_ipv6};
 use serde::{Deserialize, Serialize};
 use tracing::{debug, error};
+use crate::communicat::InitClientConfig;
 
 const BIND_PORT: u32 = 5050;
 
@@ -36,5 +38,11 @@ impl Default for GrpcConfig {
             addr: ip,
             port: BIND_PORT,
         }
+    }
+}
+
+impl InitClientConfig for GrpcConfig {
+    fn read_from_toml_file<P: AsRef<Path>>(file_path: P) -> Self {
+        todo!()
     }
 }

@@ -24,7 +24,7 @@ impl Manipulate for ManipulateImpl {
     ) -> Result<Response<Resp>, Status> {
         match self
             .manipulate_sender
-            .send(ManipulateEntity::create_by_simple_type_req(
+            .send(ManipulateEntity::from(
                 request.into_inner(),
             )) {
             Ok(_) => Ok(Response::new(Resp {
@@ -46,7 +46,7 @@ impl Manipulate for ManipulateImpl {
     ) -> Result<Response<Resp>, Status> {
         match self
             .manipulate_sender
-            .send(ManipulateEntity::create_by_text_type_req(
+            .send(ManipulateEntity::from(
                 request.into_inner(),
             )) {
             Ok(_) => Ok(Response::new(Resp {
@@ -76,7 +76,7 @@ impl Manipulate for ManipulateImpl {
                 match result {
                     Ok(manipulate) => {
                         match manipualte_sender
-                            .send(ManipulateEntity::create_by_text_type_req(manipulate))
+                            .send(ManipulateEntity::from(manipulate))
                         {
                             Ok(_) => {
                                 match tx

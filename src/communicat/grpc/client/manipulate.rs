@@ -4,19 +4,18 @@ use tokio::sync::mpsc::Receiver;
 use tokio_stream::StreamExt;
 use tokio_stream::wrappers::ReceiverStream;
 use tonic::Request;
-use tonic::transport::Channel;
 use tracing::error;
 
+use crate::communicat::grpc::client::GrpcClient;
 use crate::communicat::SendManipulateOperate;
 use crate::error::WrapResult;
 use crate::manipulate::{SimpleManipulate, TextDisplayManipulate};
-use crate::manipulate::manipulate_client::ManipulateClient;
 use crate::response_code::RespCode;
 
 #[async_trait]
-impl SendManipulateOperate for ManipulateClient<Channel> {
+impl SendManipulateOperate for GrpcClient {
     async fn send_simple(&mut self, manipulate: SimpleManipulate) -> WrapResult<RespCode> {
-        Ok(self
+        Ok(self.manipulate_client
             .send_simple_manipulate(Request::new(manipulate))
             .await?
             .into_inner()
@@ -24,7 +23,7 @@ impl SendManipulateOperate for ManipulateClient<Channel> {
     }
 
     async fn send_text_display(&mut self, manipulate: TextDisplayManipulate) -> WrapResult<RespCode> {
-        Ok(self
+        Ok(self.manipulate_client
             .send_text_display_manipulate(Request::new(manipulate))
             .await?
             .into_inner()
@@ -36,7 +35,7 @@ impl SendManipulateOperate for ManipulateClient<Channel> {
         manipulate_stream: Receiver<TextDisplayManipulate>,
     ) -> WrapResult<Receiver<RespCode>> {
         let (tx, rx) = tokio::sync::mpsc::channel::<RespCode>(128);
-        let mut resp_stream = self
+        let mut resp_stream = self.manipulate_client
             .send_multiple_text_display_manipulate(ReceiverStream::new(manipulate_stream))
             .await?
             .into_inner();

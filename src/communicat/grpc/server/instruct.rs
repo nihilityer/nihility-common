@@ -32,7 +32,7 @@ impl Instruct for InstructImpl {
     ) -> Result<Response<Resp>, Status> {
         match self
             .instruct_sender
-            .send(InstructEntity::create_by_text_type_req(
+            .send(InstructEntity::from(
                 request.into_inner(),
             )) {
             Ok(_) => Ok(Response::new(Resp {
@@ -59,7 +59,7 @@ impl Instruct for InstructImpl {
                 match result {
                     Ok(instruct) => {
                         match instruct_sender
-                            .send(InstructEntity::create_by_text_type_req(instruct))
+                            .send(InstructEntity::from(instruct))
                         {
                             Ok(_) => {
                                 match tx

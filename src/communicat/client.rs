@@ -1,15 +1,8 @@
 use async_trait::async_trait;
-use tokio::sync::mpsc::Receiver;
 
-use crate::entity::instruct::InstructEntity;
-use crate::entity::response::ResponseCode;
-use crate::error::WrapResult;
+use crate::communicat::{InitClientConfig, SendInstructOperate, SendManipulateOperate};
 
 #[async_trait]
-pub(self) trait NihilityClient {
-    async fn text_instruct(&mut self, instruct: InstructEntity) -> WrapResult<ResponseCode>;
-    async fn multiple_text_instruct(
-        &mut self,
-        instruct_stream: Receiver<InstructEntity>,
-    ) -> WrapResult<Receiver<ResponseCode>>;
+pub trait NihilityClient<T: InitClientConfig>: SendManipulateOperate + SendInstructOperate {
+    async fn init(config: T) -> Self;
 }

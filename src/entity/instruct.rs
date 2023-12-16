@@ -68,7 +68,7 @@ impl From<InstructInfo> for InstructInfoEntity {
 impl Into<InstructInfo> for InstructInfoEntity {
     fn into(self) -> InstructInfo {
         InstructInfo {
-            instruct_type: self.instruct_type.into().into(),
+            instruct_type: <Type as Into<InstructType>>::into(self.instruct_type).into(),
             receive_manipulate_submodule: self.receive_manipulate_submodule,
         }
     }
@@ -100,10 +100,7 @@ impl TryInto<TextInstruct> for InstructEntity {
         match self.instruct {
             InstructData::Text(text) => {
                 Ok(TextInstruct {
-                    info: Some(InstructInfo {
-                        instruct_type: self.info.instruct_type.into().into(),
-                        receive_manipulate_submodule: self.info.receive_manipulate_submodule,
-                    }),
+                    info: Some(self.info.into()),
                     instruct: text,
                 })
             }

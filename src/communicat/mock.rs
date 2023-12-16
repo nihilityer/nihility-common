@@ -3,9 +3,10 @@ use tokio::sync::mpsc::Receiver;
 use tracing::warn;
 
 use crate::communicat::{SendInstructOperate, SendManipulateOperate};
+use crate::entity::instruct::InstructEntity;
+use crate::entity::response::ResponseCode;
 use crate::error::NihilityCommonError::RefusalToProcess;
 use crate::error::WrapResult;
-use crate::instruct::TextInstruct;
 use crate::manipulate::{SimpleManipulate, TextDisplayManipulate};
 use crate::response_code::RespCode;
 
@@ -17,15 +18,12 @@ pub struct MockManipulateClient;
 
 #[async_trait]
 impl SendInstructOperate for MockInstructClient {
-    async fn send_text(&mut self, instruct: TextInstruct) -> WrapResult<RespCode> {
+    async fn send_text(&mut self, instruct: InstructEntity) -> WrapResult<ResponseCode> {
         warn!("Mock Instruct Client Get Instruct: {:?}", instruct);
-        return Ok(RespCode::UnableToProcess);
+        return Ok(ResponseCode::UnableToProcess);
     }
 
-    async fn send_multiple_text(
-        &mut self,
-        instruct_stream: Receiver<TextInstruct>,
-    ) -> WrapResult<Receiver<RespCode>> {
+    async fn send_multiple_text(&mut self, instruct_stream: Receiver<InstructEntity>) -> WrapResult<Receiver<ResponseCode>> {
         warn!("Mock Instruct Client Get Instruct: {:?}", instruct_stream);
         return Err(RefusalToProcess("send_multiple_text".to_string()));
     }

@@ -1,42 +1,65 @@
 use async_trait::async_trait;
 use tokio::spawn;
+use tokio::sync::mpsc;
 use tokio::sync::mpsc::Receiver;
 use tokio_stream::StreamExt;
 use tokio_stream::wrappers::ReceiverStream;
 use tonic::Request;
-use tonic::transport::Channel;
 use tracing::error;
 
+use crate::communicat::grpc::client::GrpcClient;
 use crate::communicat::SendInstructOperate;
+use crate::entity::instruct::InstructEntity;
+use crate::entity::response::ResponseCode;
 use crate::error::WrapResult;
-use crate::instruct::instruct_client::InstructClient;
 use crate::instruct::TextInstruct;
-use crate::response_code::RespCode;
+
+const STREAM_BUFFER: usize = 12;
 
 #[async_trait]
-impl SendInstructOperate for InstructClient<Channel> {
-    async fn send_text(&mut self, instruct: TextInstruct) -> WrapResult<RespCode> {
-        Ok(self
-            .send_text_instruct(Request::new(instruct))
+impl SendInstructOperate for GrpcClient {
+    async fn send_text(&mut self, instruct: InstructEntity) -> WrapResult<ResponseCode> {
+        Ok(ResponseCode::from(self.instruct_client
+            .send_text_instruct(Request::new(instruct.try_into()?))
             .await?
             .into_inner()
-            .code())
+            .code()))
     }
 
     async fn send_multiple_text(
         &mut self,
-        instruct_stream: Receiver<TextInstruct>,
-    ) -> WrapResult<Receiver<RespCode>> {
-        let (tx, rx) = tokio::sync::mpsc::channel::<RespCode>(128);
-        let mut resp_stream = self
-            .send_multiple_text_instruct(ReceiverStream::new(instruct_stream))
+        mut instruct_stream: Receiver<InstructEntity>,
+    ) -> WrapResult<Receiver<ResponseCode>> {
+        let (req_tx, req_rx) = mpsc::channel::<TextInstruct>(STREAM_BUFFER);
+        let (out_tx, out_rx) = mpsc::channel::<ResponseCode>(STREAM_BUFFER);
+        spawn(async move {
+            while let Some(instruct) = instruct_stream.recv().await {
+                match <InstructEntity as TryInto<TextInstruct>>::try_into(instruct) {
+                    Ok(text_instruct) => {
+                        match req_tx.send(text_instruct).await {
+                            Ok(_) => {}
+                            Err(e) => {
+                                error!("Grpc Client send_multiple_text Send To Stream Error: {:?}", e);
+                                break;
+                            }
+                        }
+                    }
+                    Err(e) => {
+                        error!("Grpc Client send_multiple_text Transform Error: {:?}", e);
+                        break;
+                    }
+                }
+            }
+        });
+        let mut resp_stream = self.instruct_client
+            .send_multiple_text_instruct(ReceiverStream::new(req_rx))
             .await?
             .into_inner();
         spawn(async move {
             while let Some(result) = resp_stream.next().await {
                 match result {
                     Ok(resp) => {
-                        match tx.send(resp.code()).await {
+                        match out_tx.send(ResponseCode::from(resp.code())).await {
                             Ok(_) => {}
                             Err(e) => {
                                 error!("Instruct Grpc Client send_multiple_text Send To Core Error: {:?}", e);
@@ -49,7 +72,7 @@ impl SendInstructOperate for InstructClient<Channel> {
                             "Instruct Grpc Client send_multiple_text Send Error: {:?}",
                             &status
                         );
-                        match tx.send(RespCode::UnknownError).await {
+                        match out_tx.send(ResponseCode::UnknownError).await {
                             Ok(_) => {}
                             Err(e) => {
                                 error!("Instruct Grpc Client send_multiple_text Send To Core Error: {:?}", e);
@@ -60,6 +83,6 @@ impl SendInstructOperate for InstructClient<Channel> {
                 }
             }
         });
-        Ok(rx)
+        Ok(out_rx)
     }
 }
