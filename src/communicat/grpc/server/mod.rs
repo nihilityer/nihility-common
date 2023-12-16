@@ -1,16 +1,19 @@
 use std::pin::Pin;
 
+use async_trait::async_trait;
+use tokio::spawn;
 use tokio::sync::mpsc::UnboundedSender;
 use tonic::codegen::tokio_stream::Stream;
-use tonic::transport::Server;
 use tonic::Status;
-use tracing::info;
-use crate::CANCELLATION_TOKEN;
-use crate::communicat::grpc::config::GrpcConfig;
+use tonic::transport::Server;
+use tracing::{error, info};
 
+use crate::CANCELLATION_TOKEN;
+use crate::communicat::grpc::config::GrpcServerConfig;
 use crate::communicat::grpc::server::instruct::InstructImpl;
 use crate::communicat::grpc::server::manipulate::ManipulateImpl;
 use crate::communicat::grpc::server::submodule::SubmoduleImpl;
+use crate::communicat::NihilityServer;
 use crate::entity::instruct::InstructEntity;
 use crate::entity::manipulate::ManipulateEntity;
 use crate::entity::submodule::ModuleOperate;
@@ -24,32 +27,57 @@ mod instruct;
 mod manipulate;
 mod submodule;
 
-type StreamResp = Pin<Box<dyn Stream<Item = Result<Resp, Status>> + Send>>;
+type StreamResp = Pin<Box<dyn Stream<Item=Result<Resp, Status>> + Send>>;
 
-pub(super) async fn start_server(
-    grpc_config: GrpcConfig,
-    operate_module_sender: UnboundedSender<ModuleOperate>,
-    instruct_sender: UnboundedSender<InstructEntity>,
-    manipulate_sender: UnboundedSender<ManipulateEntity>,
-) -> WrapResult<()> {
-    if !grpc_config.enable {
-        return Ok(());
-    }
-    let bind_addr = format!("{}:{}", grpc_config.addr, grpc_config.port);
-    info!("Grpc Server Bind At {}", &bind_addr);
+pub struct GrpcServer {
+    pub server_config: GrpcServerConfig,
+    submodule_operate_server: Option<SubmoduleServer<SubmoduleImpl>>,
+    instruct_server: Option<InstructServer<InstructImpl>>,
+    manipulate_server: Option<ManipulateServer<ManipulateImpl>>,
+}
 
-    Server::builder()
-        .add_service(SubmoduleServer::new(SubmoduleImpl::init(
-            operate_module_sender,
-        )))
-        .add_service(InstructServer::new(InstructImpl::init(instruct_sender)))
-        .add_service(ManipulateServer::new(ManipulateImpl::init(
-            manipulate_sender,
-        )))
-        .serve_with_shutdown(bind_addr.parse()?, async move {
-            CANCELLATION_TOKEN.get().unwrap().cancelled().await
+#[async_trait]
+impl NihilityServer<GrpcServerConfig> for GrpcServer {
+    fn init(config: GrpcServerConfig) -> WrapResult<Self> where Self: Sized + Send + Sync {
+        Ok(GrpcServer {
+            server_config: config,
+            submodule_operate_server: None,
+            instruct_server: None,
+            manipulate_server: None,
         })
-        .await?;
+    }
 
-    Ok(())
+    fn set_submodule_operate_sender(&mut self, submodule_sender: UnboundedSender<ModuleOperate>) -> WrapResult<()> {
+        self.submodule_operate_server = Some(SubmoduleServer::new(SubmoduleImpl::init(submodule_sender)));
+        Ok(())
+    }
+
+    fn set_instruct_sender(&mut self, instruct_sender: UnboundedSender<InstructEntity>) -> WrapResult<()> {
+        self.instruct_server = Some(InstructServer::new(InstructImpl::init(instruct_sender)));
+        Ok(())
+    }
+
+    fn set_manipulate_sender(&mut self, manipulate_sender: UnboundedSender<ManipulateEntity>) -> WrapResult<()> {
+        self.manipulate_server = Some(ManipulateServer::new(ManipulateImpl::init(manipulate_sender)));
+        Ok(())
+    }
+
+    fn start(&mut self) -> WrapResult<()> {
+        let bind_addr = format!("{}:{}", self.server_config.bind_ip, self.server_config.bind_port);
+        info!("Grpc Server Bind At {}", &bind_addr);
+        let server = Server::builder()
+            .add_optional_service(self.submodule_operate_server.clone())
+            .add_optional_service(self.instruct_server.clone())
+            .add_optional_service(self.manipulate_server.clone())
+            .serve_with_shutdown(bind_addr.parse()?, async move {
+                CANCELLATION_TOKEN.get().unwrap().cancelled().await
+            });
+        spawn(async move {
+            if let Err(e) = server.await {
+                error!("Grpc Server Error: {}", e);
+                CANCELLATION_TOKEN.get().unwrap().cancel();
+            }
+        });
+        Ok(())
+    }
 }

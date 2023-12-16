@@ -1,17 +1,18 @@
 use tokio::spawn;
 use tokio::sync::mpsc;
 use tokio::sync::mpsc::UnboundedSender;
-use tokio_stream::wrappers::ReceiverStream;
 use tokio_stream::StreamExt;
+use tokio_stream::wrappers::ReceiverStream;
 use tonic::{Request, Response, Status, Streaming};
 use tracing::error;
 
 use crate::communicat::grpc::server::StreamResp;
 use crate::entity::manipulate::ManipulateEntity;
-use crate::manipulate::manipulate_server::Manipulate;
 use crate::manipulate::{SimpleManipulate, TextDisplayManipulate};
+use crate::manipulate::manipulate_server::Manipulate;
 use crate::response_code::{Resp, RespCode};
 
+#[derive(Clone)]
 pub struct ManipulateImpl {
     manipulate_sender: UnboundedSender<ManipulateEntity>,
 }

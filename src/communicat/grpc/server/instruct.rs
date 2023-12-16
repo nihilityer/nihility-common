@@ -12,6 +12,7 @@ use crate::instruct::instruct_server::Instruct;
 use crate::instruct::TextInstruct;
 use crate::response_code::{Resp, RespCode};
 
+#[derive(Clone)]
 pub struct InstructImpl {
     instruct_sender: UnboundedSender<InstructEntity>,
 }

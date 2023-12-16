@@ -1,20 +1,37 @@
-use std::path::Path;
-
-use tokio::sync::mpsc::Receiver;
+use tokio::sync::mpsc::{Receiver, UnboundedSender};
 use tonic::async_trait;
 
 use crate::entity::instruct::InstructEntity;
+use crate::entity::manipulate::ManipulateEntity;
 use crate::entity::response::ResponseCode;
+use crate::entity::submodule::ModuleOperate;
 use crate::error::WrapResult;
 use crate::manipulate::{SimpleManipulate, TextDisplayManipulate};
 use crate::response_code::RespCode;
 
-mod grpc;
+pub mod grpc;
 mod mock;
-mod client;
 
-pub trait InitClientConfig {
-    fn read_from_toml_file<P: AsRef<Path>>(file_path: P) -> Self;
+pub trait InitClientConfig: Default {}
+
+#[async_trait]
+pub trait NihilityClient<T: InitClientConfig>: SendManipulateOperate + SendInstructOperate {
+    async fn init(config: T) -> WrapResult<Self> where Self: Sized + Send + Sync;
+}
+
+pub trait InitServerConfig: Default {}
+
+#[async_trait]
+pub trait NihilityServer<T: InitServerConfig> {
+    fn init(config: T) -> WrapResult<Self> where Self: Sized + Send + Sync;
+
+    fn set_submodule_operate_sender(&mut self, submodule_sender: UnboundedSender<ModuleOperate>) -> WrapResult<()>;
+
+    fn set_instruct_sender(&mut self, instruct_sender: UnboundedSender<InstructEntity>) -> WrapResult<()>;
+
+    fn set_manipulate_sender(&mut self, manipulate_sender: UnboundedSender<ManipulateEntity>) -> WrapResult<()>;
+
+    fn start(&mut self) -> WrapResult<()>;
 }
 
 /// 发送指令特征

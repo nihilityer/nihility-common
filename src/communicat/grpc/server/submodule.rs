@@ -6,6 +6,7 @@ use crate::response_code::{Resp, RespCode};
 use crate::submodule::submodule_server::Submodule;
 use crate::submodule::SubmoduleReq;
 
+#[derive(Clone)]
 pub struct SubmoduleImpl {
     operate_module_sender: UnboundedSender<ModuleOperate>,
 }
