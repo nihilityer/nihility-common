@@ -1,3 +1,4 @@
+use std::net::IpAddr;
 use std::pin::Pin;
 
 use async_trait::async_trait;
@@ -30,7 +31,7 @@ mod submodule;
 type StreamResp = Pin<Box<dyn Stream<Item=Result<Resp, Status>> + Send>>;
 
 pub struct GrpcServer {
-    pub server_config: GrpcServerConfig,
+    server_config: GrpcServerConfig,
     submodule_operate_server: Option<SubmoduleServer<SubmoduleImpl>>,
     instruct_server: Option<InstructServer<InstructImpl>>,
     manipulate_server: Option<ManipulateServer<ManipulateImpl>>,
@@ -63,7 +64,10 @@ impl NihilityServer<GrpcServerConfig> for GrpcServer {
     }
 
     fn start(&mut self) -> WrapResult<()> {
-        let bind_addr = format!("{}:{}", self.server_config.bind_ip, self.server_config.bind_port);
+        let bind_addr = match self.server_config.bind_ip {
+            IpAddr::V4(ip) => format!("{}:{}", ip, self.server_config.bind_port),
+            IpAddr::V6(ip) => format!("[{}]:{}", ip, self.server_config.bind_port)
+        };
         info!("Grpc Server Bind At {}", &bind_addr);
         let server = Server::builder()
             .add_optional_service(self.submodule_operate_server.clone())

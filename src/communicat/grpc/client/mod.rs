@@ -6,25 +6,42 @@ use crate::communicat::NihilityClient;
 use crate::error::WrapResult;
 use crate::instruct::instruct_client::InstructClient;
 use crate::manipulate::manipulate_client::ManipulateClient;
+use crate::submodule::submodule_client::SubmoduleClient;
 
 mod instruct;
 mod manipulate;
+mod submodule_operate;
 
 pub struct GrpcClient {
     config: GrpcClientConfig,
-    instruct_client: InstructClient<Channel>,
-    manipulate_client: ManipulateClient<Channel>,
+    submodule_operate_client: Option<SubmoduleClient<Channel>>,
+    instruct_client: Option<InstructClient<Channel>>,
+    manipulate_client: Option<ManipulateClient<Channel>>,
 }
 
 #[async_trait]
 impl NihilityClient<GrpcClientConfig> for GrpcClient {
     async fn init(config: GrpcClientConfig) -> WrapResult<Self> where Self: Sized + Send + Sync {
-        let instruct_client = InstructClient::connect(config.terminal_address.to_string()).await?;
-        let manipulate_client = ManipulateClient::connect(config.terminal_address.to_string()).await?;
         Ok(GrpcClient {
             config,
-            instruct_client,
-            manipulate_client,
+            submodule_operate_client: None,
+            instruct_client: None,
+            manipulate_client: None,
         })
+    }
+
+    async fn connection_submodule_operate_server(&mut self) -> WrapResult<()> {
+        self.submodule_operate_client = Some(SubmoduleClient::connect(self.config.terminal_address.to_string()).await?);
+        Ok(())
+    }
+
+    async fn connection_instruct_server(&mut self) -> WrapResult<()> {
+        self.instruct_client = Some(InstructClient::connect(self.config.terminal_address.to_string()).await?);
+        Ok(())
+    }
+
+    async fn connection_manipulate_server(&mut self) -> WrapResult<()> {
+        self.manipulate_client = Some(ManipulateClient::connect(self.config.terminal_address.to_string()).await?);
+        Ok(())
     }
 }

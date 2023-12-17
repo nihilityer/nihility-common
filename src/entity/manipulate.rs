@@ -141,3 +141,18 @@ impl From<SimpleManipulate> for ManipulateEntity {
         }
     }
 }
+
+impl TryInto<SimpleManipulate> for ManipulateEntity {
+    type Error = NihilityCommonError;
+
+    fn try_into(self) -> Result<SimpleManipulate, Self::Error> {
+        match self.manipulate {
+            ManipulateData::Simple => {
+                Ok(SimpleManipulate {
+                    info: Some(self.info.into()),
+                })
+            }
+            other_type => Err(CreateManipulateReq(other_type))
+        }
+    }
+}

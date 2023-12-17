@@ -1,7 +1,14 @@
 use std::sync::OnceLock;
+
 use tokio_util::sync::CancellationToken;
 
-pub mod communicat;
+pub use communicat::grpc::client::GrpcClient;
+pub use communicat::grpc::config::{GrpcClientConfig, GrpcServerConfig};
+pub use communicat::grpc::server::GrpcServer;
+pub use communicat::NihilityClient;
+pub use communicat::NihilityServer;
+
+mod communicat;
 mod entity;
 mod error;
 
