@@ -1,10 +1,10 @@
 use crate::DEFAULT_INSTRUCT_HANDLER_SUBMODULE_NAME;
 use crate::error::NihilityCommonError;
 use crate::error::NihilityCommonError::CreateManipulateReq;
-use crate::manipulate::{ManipulateInfo, ManipulateType, SimpleManipulate, TextDisplayManipulate};
+use crate::manipulate::{ManipulateInfo, Type, SimpleManipulate, TextDisplayManipulate};
 
 #[derive(Debug, Clone)]
-pub enum Type {
+pub enum ManipulateType {
     DefaultType,
     SpecialType,
     OfflineType,
@@ -16,7 +16,7 @@ pub enum Type {
 
 #[derive(Debug, Clone)]
 pub struct ManipulateInfoEntity {
-    pub manipulate_type: Type,
+    pub manipulate_type: ManipulateType,
     pub use_module_name: String,
 }
 
@@ -33,23 +33,9 @@ pub struct ManipulateEntity {
     pub manipulate: ManipulateData,
 }
 
-impl From<ManipulateType> for Type {
-    fn from(value: ManipulateType) -> Self {
+impl From<Type> for ManipulateType {
+    fn from(value: Type) -> Self {
         match value {
-            ManipulateType::DefaultType => Type::DefaultType,
-            ManipulateType::SpecialType => Type::SpecialType,
-            ManipulateType::OfflineType => Type::OfflineType,
-            ManipulateType::DiscontinueType => Type::DiscontinueType,
-            ManipulateType::CancelType => Type::CancelType,
-            ManipulateType::ConfirmType => Type::ConfirmType,
-            ManipulateType::WaitNextType => Type::WaitNextType,
-        }
-    }
-}
-
-impl Into<ManipulateType> for Type {
-    fn into(self) -> ManipulateType {
-        match self {
             Type::DefaultType => ManipulateType::DefaultType,
             Type::SpecialType => ManipulateType::SpecialType,
             Type::OfflineType => ManipulateType::OfflineType,
@@ -61,10 +47,24 @@ impl Into<ManipulateType> for Type {
     }
 }
 
+impl Into<Type> for ManipulateType {
+    fn into(self) -> Type {
+        match self {
+            ManipulateType::DefaultType => Type::DefaultType,
+            ManipulateType::SpecialType => Type::SpecialType,
+            ManipulateType::OfflineType => Type::OfflineType,
+            ManipulateType::DiscontinueType => Type::DiscontinueType,
+            ManipulateType::CancelType => Type::CancelType,
+            ManipulateType::ConfirmType => Type::ConfirmType,
+            ManipulateType::WaitNextType => Type::WaitNextType,
+        }
+    }
+}
+
 impl Default for ManipulateInfoEntity {
     fn default() -> Self {
         ManipulateInfoEntity {
-            manipulate_type: Type::DefaultType,
+            manipulate_type: ManipulateType::DefaultType,
             use_module_name: DEFAULT_INSTRUCT_HANDLER_SUBMODULE_NAME.get().unwrap().to_string(),
         }
     }
@@ -73,7 +73,7 @@ impl Default for ManipulateInfoEntity {
 impl From<ManipulateInfo> for ManipulateInfoEntity {
     fn from(value: ManipulateInfo) -> Self {
         ManipulateInfoEntity {
-            manipulate_type: Type::from(value.manipulate_type()),
+            manipulate_type: ManipulateType::from(value.manipulate_type()),
             use_module_name: value.use_module_name,
         }
     }
@@ -82,7 +82,7 @@ impl From<ManipulateInfo> for ManipulateInfoEntity {
 impl Into<ManipulateInfo> for ManipulateInfoEntity {
     fn into(self) -> ManipulateInfo {
         ManipulateInfo {
-            manipulate_type: <Type as Into<ManipulateType>>::into(self.manipulate_type).into(),
+            manipulate_type: <ManipulateType as Into<Type>>::into(self.manipulate_type).into(),
             use_module_name: self.use_module_name,
         }
     }

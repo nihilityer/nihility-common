@@ -4,7 +4,7 @@ import public "response_code.proto";
 
 package instruct;
 
-enum InstructType {
+enum Type {
   DEFAULT_TYPE = 0;
   SPECIAL_TYPE = 1;
   WAIT_NEXT_TYPE = 2;
@@ -16,7 +16,7 @@ service Instruct {
 }
 
 message InstructInfo {
-  InstructType instruct_type = 1;
+  Type instruct_type = 1;
   string receive_manipulate_submodule = 3;
 }
 

@@ -81,6 +81,7 @@ impl NihilityServer<GrpcServerConfig> for GrpcServer {
                 error!("Grpc Server Error: {}", e);
                 CANCELLATION_TOKEN.get().unwrap().cancel();
             }
+            info!("Grpc Server Stop")
         });
         Ok(())
     }

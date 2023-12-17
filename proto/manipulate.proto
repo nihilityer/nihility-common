@@ -4,7 +4,7 @@ import public "response_code.proto";
 
 package manipulate;
 
-enum ManipulateType {
+enum Type {
   DEFAULT_TYPE = 0;
   SPECIAL_TYPE = 1;
   OFFLINE_TYPE = 2;
@@ -21,7 +21,7 @@ service Manipulate {
 }
 
 message ManipulateInfo {
-  ManipulateType manipulate_type = 1;
+  Type manipulate_type = 1;
   string use_module_name = 2;
 }
 

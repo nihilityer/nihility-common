@@ -1,9 +1,9 @@
 use crate::DEFAULT_RECEIVER_SUBMODULE_NAME;
 use crate::error::NihilityCommonError;
-use crate::instruct::{InstructInfo, InstructType, TextInstruct};
+use crate::instruct::{InstructInfo, Type, TextInstruct};
 
 #[derive(Debug)]
-pub enum Type {
+pub enum InstructType {
     DefaultType,
     SpecialType,
     WaitNextType,
@@ -11,7 +11,7 @@ pub enum Type {
 
 #[derive(Debug)]
 pub struct InstructInfoEntity {
-    pub instruct_type: Type,
+    pub instruct_type: InstructType,
     pub receive_manipulate_submodule: String,
 }
 
@@ -27,19 +27,9 @@ pub struct InstructEntity {
     pub instruct: InstructData,
 }
 
-impl From<InstructType> for Type {
-    fn from(value: InstructType) -> Self {
+impl From<Type> for InstructType {
+    fn from(value: Type) -> Self {
         match value {
-            InstructType::DefaultType => Type::DefaultType,
-            InstructType::SpecialType => Type::SpecialType,
-            InstructType::WaitNextType => Type::WaitNextType,
-        }
-    }
-}
-
-impl Into<InstructType> for Type {
-    fn into(self) -> InstructType {
-        match self {
             Type::DefaultType => InstructType::DefaultType,
             Type::SpecialType => InstructType::SpecialType,
             Type::WaitNextType => InstructType::WaitNextType,
@@ -47,10 +37,20 @@ impl Into<InstructType> for Type {
     }
 }
 
+impl Into<Type> for InstructType {
+    fn into(self) -> Type {
+        match self {
+            InstructType::DefaultType => Type::DefaultType,
+            InstructType::SpecialType => Type::SpecialType,
+            InstructType::WaitNextType => Type::WaitNextType,
+        }
+    }
+}
+
 impl Default for InstructInfoEntity {
     fn default() -> Self {
         InstructInfoEntity {
-            instruct_type: Type::DefaultType,
+            instruct_type: InstructType::DefaultType,
             receive_manipulate_submodule: DEFAULT_RECEIVER_SUBMODULE_NAME.get().unwrap().to_string(),
         }
     }
@@ -59,7 +59,7 @@ impl Default for InstructInfoEntity {
 impl From<InstructInfo> for InstructInfoEntity {
     fn from(value: InstructInfo) -> Self {
         InstructInfoEntity {
-            instruct_type: Type::from(value.instruct_type()),
+            instruct_type: InstructType::from(value.instruct_type()),
             receive_manipulate_submodule: value.receive_manipulate_submodule,
         }
     }
@@ -68,7 +68,7 @@ impl From<InstructInfo> for InstructInfoEntity {
 impl Into<InstructInfo> for InstructInfoEntity {
     fn into(self) -> InstructInfo {
         InstructInfo {
-            instruct_type: <Type as Into<InstructType>>::into(self.instruct_type).into(),
+            instruct_type: <InstructType as Into<Type>>::into(self.instruct_type).into(),
             receive_manipulate_submodule: self.receive_manipulate_submodule,
         }
     }
