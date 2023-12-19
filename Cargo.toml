@@ -19,6 +19,6 @@ local-ip-address = "0.5"
 tonic-build = "0.10"
 
 [dev-dependencies]
-tokio = { version = "1.35", features = ["sync", "rt", "macros"] }
+tokio = { version = "1.35", features = ["sync", "rt", "macros", "rt-multi-thread"] }
 time = {version = "0.3", features = ["macros"]}
 tracing-subscriber = {version = "0.3", features = ["local-time"]}

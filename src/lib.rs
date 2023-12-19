@@ -1,7 +1,3 @@
-use std::sync::OnceLock;
-
-use tokio_util::sync::CancellationToken;
-
 pub use communicat::grpc::client::GrpcClient;
 pub use communicat::grpc::config::{GrpcClientConfig, GrpcServerConfig};
 pub use communicat::grpc::server::GrpcServer;
@@ -31,12 +27,6 @@ pub use entity::submodule::{
 mod communicat;
 mod entity;
 mod error;
-
-pub(crate) static CANCELLATION_TOKEN: OnceLock<CancellationToken> = OnceLock::new();
-
-pub(crate) static DEFAULT_RECEIVER_SUBMODULE_NAME: OnceLock<String> = OnceLock::new();
-
-pub(crate) static DEFAULT_INSTRUCT_HANDLER_SUBMODULE_NAME: OnceLock<String> = OnceLock::new();
 
 pub(crate) mod manipulate {
     tonic::include_proto!("manipulate");

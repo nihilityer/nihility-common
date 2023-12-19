@@ -1,17 +1,27 @@
+use std::net::IpAddr;
+use std::str::FromStr;
 use std::time::Duration;
+
 use time::macros::format_description;
 use time::UtcOffset;
-
+use tokio::join;
 use tokio::sync::mpsc;
+use tokio_util::sync::CancellationToken;
 use tracing::{error, info, Level};
 
-use nihility_common::{GrpcServer, GrpcServerConfig, NihilityServer};
+use nihility_common::{GrpcClient, GrpcClientConfig, GrpcServer, GrpcServerConfig, NihilityClient, NihilityServer};
 
-#[tokio::test]
-async fn test_server() {
+#[tokio::test(flavor = "multi_thread", worker_threads = 2)]
+async fn test() {
     init_log();
-    let server_config = GrpcServerConfig::default();
-    let mut server = GrpcServer::init(server_config).unwrap();
+    join!(test_grpc_server(), test_grpc_client());
+    tokio::time::sleep(Duration::from_secs(15)).await;
+}
+
+async fn test_grpc_server() {
+    let mut server_config = GrpcServerConfig::default();
+    server_config.bind_ip = IpAddr::from_str("127.0.0.1").unwrap();
+    let mut server = GrpcServer::init(server_config, CancellationToken::new());
     let (tx, mut rx) = mpsc::unbounded_channel();
     server.set_submodule_operate_sender(tx).unwrap();
     server.start().unwrap();
@@ -21,9 +31,18 @@ async fn test_server() {
             info!("operate: {:?}", operate);
         }
         Err(e) => {
-            error!("error: {:?}", e)
+            error!("error: {}", e)
         }
     }
+}
+
+async fn test_grpc_client() {
+    info!("Sleep, Wait Server Start");
+    tokio::time::sleep(Duration::from_secs(5)).await;
+    let config = GrpcClientConfig::default();
+    let mut client = GrpcClient::init(config);
+    client.connection_submodule_operate_server().await.unwrap();
+    info!("Connection Success!");
 }
 
 fn init_log() {

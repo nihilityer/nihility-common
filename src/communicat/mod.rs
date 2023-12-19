@@ -9,11 +9,9 @@ use crate::error::{NihilityCommonError, WrapResult};
 
 pub mod grpc;
 
-pub trait InitClientConfig: Default {}
 
 #[async_trait]
-pub trait NihilityClient<T: InitClientConfig>: SendManipulateOperate + SendInstructOperate + SubmoduleOperate {
-    async fn init(config: T) -> WrapResult<Self> where Self: Sized + Send + Sync;
+pub trait NihilityClient: SendManipulateOperate + SendInstructOperate + SubmoduleOperate {
     async fn connection_submodule_operate_server(&mut self) -> WrapResult<()>;
     async fn connection_instruct_server(&mut self) -> WrapResult<()>;
     async fn connection_manipulate_server(&mut self) -> WrapResult<()>;
@@ -79,12 +77,8 @@ pub trait NihilityClient<T: InitClientConfig>: SendManipulateOperate + SendInstr
     }
 }
 
-pub trait InitServerConfig: Default {}
-
 #[async_trait]
-pub trait NihilityServer<T: InitServerConfig> {
-    fn init(config: T) -> WrapResult<Self> where Self: Sized + Send + Sync;
-
+pub trait NihilityServer {
     fn set_submodule_operate_sender(&mut self, submodule_sender: UnboundedSender<ModuleOperate>) -> WrapResult<()>;
 
     fn set_instruct_sender(&mut self, instruct_sender: UnboundedSender<InstructEntity>) -> WrapResult<()>;

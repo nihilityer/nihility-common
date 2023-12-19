@@ -4,12 +4,12 @@ use std::pin::Pin;
 use async_trait::async_trait;
 use tokio::spawn;
 use tokio::sync::mpsc::UnboundedSender;
+use tokio_util::sync::CancellationToken;
 use tonic::codegen::tokio_stream::Stream;
 use tonic::Status;
 use tonic::transport::Server;
 use tracing::{error, info};
 
-use crate::CANCELLATION_TOKEN;
 use crate::communicat::grpc::config::GrpcServerConfig;
 use crate::communicat::grpc::server::instruct::InstructImpl;
 use crate::communicat::grpc::server::manipulate::ManipulateImpl;
@@ -32,22 +32,26 @@ type StreamResp = Pin<Box<dyn Stream<Item=Result<Resp, Status>> + Send>>;
 
 pub struct GrpcServer {
     server_config: GrpcServerConfig,
+    cancellation_token: CancellationToken,
     submodule_operate_server: Option<SubmoduleServer<SubmoduleImpl>>,
     instruct_server: Option<InstructServer<InstructImpl>>,
     manipulate_server: Option<ManipulateServer<ManipulateImpl>>,
 }
 
-#[async_trait]
-impl NihilityServer<GrpcServerConfig> for GrpcServer {
-    fn init(config: GrpcServerConfig) -> WrapResult<Self> where Self: Sized + Send + Sync {
-        Ok(GrpcServer {
-            server_config: config,
+impl GrpcServer {
+    pub fn init(grpc_server_config: GrpcServerConfig, cancellation_token: CancellationToken) -> Self {
+        GrpcServer {
+            server_config: grpc_server_config,
+            cancellation_token,
             submodule_operate_server: None,
             instruct_server: None,
             manipulate_server: None,
-        })
+        }
     }
+}
 
+#[async_trait]
+impl NihilityServer for GrpcServer {
     fn set_submodule_operate_sender(&mut self, submodule_sender: UnboundedSender<ModuleOperate>) -> WrapResult<()> {
         self.submodule_operate_server = Some(SubmoduleServer::new(SubmoduleImpl::init(submodule_sender)));
         Ok(())
@@ -69,17 +73,19 @@ impl NihilityServer<GrpcServerConfig> for GrpcServer {
             IpAddr::V6(ip) => format!("[{}]:{}", ip, self.server_config.bind_port)
         };
         info!("Grpc Server Bind At {}", &bind_addr);
+        let server_cancellation_token = self.cancellation_token.clone();
         let server = Server::builder()
             .add_optional_service(self.submodule_operate_server.clone())
             .add_optional_service(self.instruct_server.clone())
             .add_optional_service(self.manipulate_server.clone())
             .serve_with_shutdown(bind_addr.parse()?, async move {
-                CANCELLATION_TOKEN.get().unwrap().cancelled().await
+                server_cancellation_token.cancelled().await
             });
+        let cancellation_token = self.cancellation_token.clone();
         spawn(async move {
             if let Err(e) = server.await {
                 error!("Grpc Server Error: {}", e);
-                CANCELLATION_TOKEN.get().unwrap().cancel();
+                cancellation_token.cancel();
             }
             info!("Grpc Server Stop")
         });

@@ -1,7 +1,6 @@
-use crate::DEFAULT_INSTRUCT_HANDLER_SUBMODULE_NAME;
 use crate::error::NihilityCommonError;
 use crate::error::NihilityCommonError::CreateManipulateReq;
-use crate::manipulate::{ManipulateInfo, Type, SimpleManipulate, TextDisplayManipulate};
+use crate::manipulate::{ManipulateInfo, SimpleManipulate, TextDisplayManipulate, Type};
 
 #[derive(Debug, Clone)]
 pub enum ManipulateType {
@@ -65,7 +64,7 @@ impl Default for ManipulateInfoEntity {
     fn default() -> Self {
         ManipulateInfoEntity {
             manipulate_type: ManipulateType::DefaultType,
-            use_module_name: DEFAULT_INSTRUCT_HANDLER_SUBMODULE_NAME.get().unwrap().to_string(),
+            use_module_name: String::default(),
         }
     }
 }

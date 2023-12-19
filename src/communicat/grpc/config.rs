@@ -5,8 +5,6 @@ use local_ip_address::{local_ip, local_ipv6};
 use serde::{Deserialize, Serialize};
 use tracing::{debug, error};
 
-use crate::communicat::{InitClientConfig, InitServerConfig};
-
 const BIND_PORT: u32 = 5050;
 const BIND_IP: &str = "127.0.0.1";
 const DEFAULT_NAME: &str = "nihility-submodule";
@@ -59,7 +57,3 @@ impl Default for GrpcClientConfig {
         }
     }
 }
-
-impl InitServerConfig for GrpcServerConfig {}
-
-impl InitClientConfig for GrpcClientConfig {}

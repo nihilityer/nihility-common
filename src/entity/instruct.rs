@@ -1,6 +1,5 @@
-use crate::DEFAULT_RECEIVER_SUBMODULE_NAME;
 use crate::error::NihilityCommonError;
-use crate::instruct::{InstructInfo, Type, TextInstruct};
+use crate::instruct::{InstructInfo, TextInstruct, Type};
 
 #[derive(Debug)]
 pub enum InstructType {
@@ -51,7 +50,7 @@ impl Default for InstructInfoEntity {
     fn default() -> Self {
         InstructInfoEntity {
             instruct_type: InstructType::DefaultType,
-            receive_manipulate_submodule: DEFAULT_RECEIVER_SUBMODULE_NAME.get().unwrap().to_string(),
+            receive_manipulate_submodule: String::default(),
         }
     }
 }
