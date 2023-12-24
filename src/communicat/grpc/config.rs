@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 use std::net::IpAddr;
 use std::str::FromStr;
 
@@ -5,11 +6,15 @@ use local_ip_address::{local_ip, local_ipv6};
 use serde::{Deserialize, Serialize};
 use tracing::{debug, error};
 
+use crate::error::NihilityCommonError;
+
 const BIND_PORT: u32 = 5050;
 const BIND_IP: &str = "127.0.0.1";
 const DEFAULT_NAME: &str = "nihility-submodule";
 const DEFAULT_TERMINAL_ADDR: &str = "http://127.0.0.1:5050";
-const DEFAULT_SERVER_ADDR: &str = "http://127.0.0.1:1234";
+
+const SERVER_ADDR_FIELD: &str = "server_addr";
+const SUBMODULE_NAME_FIELD: &str = "submodule_name";
 
 /// Grpc相关配置
 #[derive(Deserialize, Serialize, Clone, Debug)]
@@ -20,9 +25,8 @@ pub struct GrpcServerConfig {
 
 #[derive(Deserialize, Serialize, Clone, Debug)]
 pub struct GrpcClientConfig {
-    pub terminal_address: String,
-    pub submodule_name: String,
     pub server_address: String,
+    pub submodule_name: String,
 }
 
 impl Default for GrpcServerConfig {
@@ -51,9 +55,38 @@ impl Default for GrpcServerConfig {
 impl Default for GrpcClientConfig {
     fn default() -> Self {
         GrpcClientConfig {
-            terminal_address: DEFAULT_TERMINAL_ADDR.to_string(),
+            server_address: DEFAULT_TERMINAL_ADDR.to_string(),
             submodule_name: DEFAULT_NAME.to_string(),
-            server_address: DEFAULT_SERVER_ADDR.to_string(),
         }
+    }
+}
+
+impl GrpcServerConfig {
+    pub fn create_connection_params(&self, submodule_name: &String) -> HashMap<String, String> {
+        let mut result = HashMap::<String, String>::new();
+        result.insert(SUBMODULE_NAME_FIELD.to_string(), submodule_name.to_string());
+        let server_addr = match self.bind_ip {
+            IpAddr::V4(ip) => format!("http://{}:{}", ip, self.bind_port),
+            IpAddr::V6(ip) => format!("http://[{}]:{}", ip, self.bind_port),
+        };
+        result.insert(SERVER_ADDR_FIELD.to_string(), server_addr);
+        result
+    }
+}
+
+impl TryFrom<HashMap<String, String>> for GrpcClientConfig {
+    type Error = NihilityCommonError;
+
+    fn try_from(value: HashMap<String, String>) -> Result<Self, Self::Error> {
+        if let (Some(server_address), Some(submodule_name)) = (
+            value.get(SERVER_ADDR_FIELD),
+            value.get(SUBMODULE_NAME_FIELD),
+        ) {
+            return Ok(GrpcClientConfig {
+                server_address: server_address.to_string(),
+                submodule_name: submodule_name.to_string(),
+            });
+        }
+        Err(NihilityCommonError::ConfigFieldMissing)
     }
 }

@@ -9,7 +9,9 @@ use tokio::sync::mpsc;
 use tokio_util::sync::CancellationToken;
 use tracing::{error, info, Level};
 
-use nihility_common::{GrpcClient, GrpcClientConfig, GrpcServer, GrpcServerConfig, NihilityClient, NihilityServer};
+use nihility_common::{
+    GrpcClient, GrpcClientConfig, GrpcServer, GrpcServerConfig, NihilityClient, NihilityServer,
+};
 
 #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
 async fn test() {
@@ -21,6 +23,10 @@ async fn test() {
 async fn test_grpc_server() {
     let mut server_config = GrpcServerConfig::default();
     server_config.bind_ip = IpAddr::from_str("127.0.0.1").unwrap();
+    let connection_params = server_config.create_connection_params(&"test".to_string());
+    info!("connection_params: {:?}", &connection_params);
+    let client_config = GrpcClientConfig::try_from(connection_params.clone()).unwrap();
+    info!("client_config: {:?}", &client_config);
     let mut server = GrpcServer::init(server_config, CancellationToken::new());
     let (tx, mut rx) = mpsc::unbounded_channel();
     server.set_submodule_operate_sender(tx).unwrap();

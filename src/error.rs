@@ -17,6 +17,8 @@ pub enum NihilityCommonError {
     CreateSubmoduleHeartbeat(OperateType),
     #[error("{0:?} Client Not Connected")]
     NotConnected(String),
+    #[error("Config Field Missing")]
+    ConfigFieldMissing,
     #[error("Parse Addr Error")]
     AddrParse(#[from] AddrParseError),
     #[error("Tonic Transport Error")]
