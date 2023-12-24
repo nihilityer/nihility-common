@@ -26,7 +26,7 @@ impl SendInstructOperate for GrpcClient {
         true
     }
 
-    async fn send_text_instruct(&mut self, instruct: InstructEntity) -> WrapResult<ResponseCode> {
+    async fn send_text_instruct(&self, instruct: InstructEntity) -> WrapResult<ResponseCode> {
         Ok(ResponseCode::from(self.instruct_client.clone().unwrap()
             .send_text_instruct(Request::new(instruct.try_into()?))
             .await?
@@ -35,7 +35,7 @@ impl SendInstructOperate for GrpcClient {
     }
 
     async fn send_multiple_text_instruct(
-        &mut self,
+        &self,
         mut instruct_stream: Receiver<InstructEntity>,
     ) -> WrapResult<Receiver<ResponseCode>> {
         let (req_tx, req_rx) = mpsc::channel::<TextInstruct>(STREAM_BUFFER);

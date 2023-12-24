@@ -16,7 +16,7 @@ impl SubmoduleOperate for GrpcClient {
         }
         true
     }
-    async fn send_register(&mut self, operate: ModuleOperate) -> WrapResult<ResponseCode> {
+    async fn send_register(&self, operate: ModuleOperate) -> WrapResult<ResponseCode> {
         Ok(ResponseCode::from(self.submodule_operate_client.clone().unwrap()
             .register(Request::new(operate.try_into()?))
             .await?
@@ -24,7 +24,7 @@ impl SubmoduleOperate for GrpcClient {
             .code()))
     }
 
-    async fn send_heartbeat(&mut self, operate: ModuleOperate) -> WrapResult<ResponseCode> {
+    async fn send_heartbeat(&self, operate: ModuleOperate) -> WrapResult<ResponseCode> {
         Ok(ResponseCode::from(self.submodule_operate_client.clone().unwrap()
             .heartbeat(Request::new(operate.try_into()?))
             .await?
@@ -32,7 +32,7 @@ impl SubmoduleOperate for GrpcClient {
             .code()))
     }
 
-    async fn send_offline(&mut self, operate: ModuleOperate) -> WrapResult<ResponseCode> {
+    async fn send_offline(&self, operate: ModuleOperate) -> WrapResult<ResponseCode> {
         Ok(ResponseCode::from(self.submodule_operate_client.clone().unwrap()
             .offline(Request::new(operate.try_into()?))
             .await?
@@ -40,7 +40,7 @@ impl SubmoduleOperate for GrpcClient {
             .code()))
     }
 
-    async fn send_update(&mut self, operate: ModuleOperate) -> WrapResult<ResponseCode> {
+    async fn send_update(&self, operate: ModuleOperate) -> WrapResult<ResponseCode> {
         Ok(ResponseCode::from(self.submodule_operate_client.clone().unwrap()
             .update(Request::new(operate.try_into()?))
             .await?

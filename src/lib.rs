@@ -1,6 +1,8 @@
-pub use communicat::grpc::client::GrpcClient;
-pub use communicat::grpc::config::{GrpcClientConfig, GrpcServerConfig};
-pub use communicat::grpc::server::GrpcServer;
+pub use communicat::grpc::{
+    client::GrpcClient,
+    config::{GrpcClientConfig, GrpcServerConfig},
+    server::GrpcServer,
+};
 pub use communicat::NihilityClient;
 pub use communicat::NihilityServer;
 pub use entity::instruct::{

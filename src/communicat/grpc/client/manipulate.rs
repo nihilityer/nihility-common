@@ -25,7 +25,7 @@ impl SendManipulateOperate for GrpcClient {
         }
         true
     }
-    async fn send_simple_manipulate(&mut self, manipulate: ManipulateEntity) -> WrapResult<ResponseCode> {
+    async fn send_simple_manipulate(&self, manipulate: ManipulateEntity) -> WrapResult<ResponseCode> {
         Ok(ResponseCode::from(self.manipulate_client.clone().unwrap()
             .send_simple_manipulate(Request::new(manipulate.try_into()?))
             .await?
@@ -33,7 +33,7 @@ impl SendManipulateOperate for GrpcClient {
             .code()))
     }
 
-    async fn send_text_display_manipulate(&mut self, manipulate: ManipulateEntity) -> WrapResult<ResponseCode> {
+    async fn send_text_display_manipulate(&self, manipulate: ManipulateEntity) -> WrapResult<ResponseCode> {
         Ok(ResponseCode::from(self.manipulate_client.clone().unwrap()
             .send_text_display_manipulate(Request::new(manipulate.try_into()?))
             .await?
@@ -42,7 +42,7 @@ impl SendManipulateOperate for GrpcClient {
     }
 
     async fn send_multiple_text_display_manipulate(
-        &mut self,
+        &self,
         mut manipulate_stream: Receiver<ManipulateEntity>,
     ) -> WrapResult<Receiver<ResponseCode>> {
         let (req_tx, req_rx) = mpsc::channel::<TextDisplayManipulate>(STREAM_BUFFER);
