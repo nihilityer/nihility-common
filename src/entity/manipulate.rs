@@ -46,9 +46,9 @@ impl From<Type> for ManipulateType {
     }
 }
 
-impl Into<Type> for ManipulateType {
-    fn into(self) -> Type {
-        match self {
+impl From<ManipulateType> for Type {
+    fn from(value: ManipulateType) -> Self {
+        match value {
             ManipulateType::DefaultType => Type::DefaultType,
             ManipulateType::SpecialType => Type::SpecialType,
             ManipulateType::OfflineType => Type::OfflineType,
@@ -78,11 +78,11 @@ impl From<ManipulateInfo> for ManipulateInfoEntity {
     }
 }
 
-impl Into<ManipulateInfo> for ManipulateInfoEntity {
-    fn into(self) -> ManipulateInfo {
+impl From<ManipulateInfoEntity> for ManipulateInfo {
+    fn from(value: ManipulateInfoEntity) -> Self {
         ManipulateInfo {
-            manipulate_type: <ManipulateType as Into<Type>>::into(self.manipulate_type).into(),
-            use_module_name: self.use_module_name,
+            manipulate_type: Type::from(value.manipulate_type).into(),
+            use_module_name: value.use_module_name,
         }
     }
 }
@@ -90,18 +90,14 @@ impl Into<ManipulateInfo> for ManipulateInfoEntity {
 impl From<TextDisplayManipulate> for ManipulateEntity {
     fn from(value: TextDisplayManipulate) -> Self {
         match value.info {
-            None => {
-                ManipulateEntity {
-                    info: ManipulateInfoEntity::default(),
-                    manipulate: ManipulateData::Text(value.text),
-                }
-            }
-            Some(info) => {
-                ManipulateEntity {
-                    info: info.into(),
-                    manipulate: ManipulateData::Text(value.text),
-                }
-            }
+            None => ManipulateEntity {
+                info: ManipulateInfoEntity::default(),
+                manipulate: ManipulateData::Text(value.text),
+            },
+            Some(info) => ManipulateEntity {
+                info: info.into(),
+                manipulate: ManipulateData::Text(value.text),
+            },
         }
     }
 }
@@ -111,13 +107,11 @@ impl TryInto<TextDisplayManipulate> for ManipulateEntity {
 
     fn try_into(self) -> Result<TextDisplayManipulate, Self::Error> {
         match self.manipulate {
-            ManipulateData::Text(text) => {
-                Ok(TextDisplayManipulate {
-                    info: Some(self.info.into()),
-                    text,
-                })
-            }
-            other_type => Err(CreateManipulateReq(other_type))
+            ManipulateData::Text(text) => Ok(TextDisplayManipulate {
+                info: Some(self.info.into()),
+                text,
+            }),
+            other_type => Err(CreateManipulateReq(other_type)),
         }
     }
 }
@@ -125,18 +119,14 @@ impl TryInto<TextDisplayManipulate> for ManipulateEntity {
 impl From<SimpleManipulate> for ManipulateEntity {
     fn from(value: SimpleManipulate) -> Self {
         match value.info {
-            None => {
-                ManipulateEntity {
-                    info: ManipulateInfoEntity::default(),
-                    manipulate: ManipulateData::Simple,
-                }
-            }
-            Some(info) => {
-                ManipulateEntity {
-                    info: info.into(),
-                    manipulate: ManipulateData::Simple,
-                }
-            }
+            None => ManipulateEntity {
+                info: ManipulateInfoEntity::default(),
+                manipulate: ManipulateData::Simple,
+            },
+            Some(info) => ManipulateEntity {
+                info: info.into(),
+                manipulate: ManipulateData::Simple,
+            },
         }
     }
 }
@@ -146,12 +136,10 @@ impl TryInto<SimpleManipulate> for ManipulateEntity {
 
     fn try_into(self) -> Result<SimpleManipulate, Self::Error> {
         match self.manipulate {
-            ManipulateData::Simple => {
-                Ok(SimpleManipulate {
-                    info: Some(self.info.into()),
-                })
-            }
-            other_type => Err(CreateManipulateReq(other_type))
+            ManipulateData::Simple => Ok(SimpleManipulate {
+                info: Some(self.info.into()),
+            }),
+            other_type => Err(CreateManipulateReq(other_type)),
         }
     }
 }

@@ -65,8 +65,8 @@ impl From<ReceiveType> for ClientType {
 
 impl From<SubmoduleReq> for ModuleOperate {
     fn from(value: SubmoduleReq) -> Self {
-        let connection_type = ConnectionType::from(value.submodule_type().clone());
-        let client_type = ClientType::from(value.receive_type().clone());
+        let connection_type = ConnectionType::from(value.submodule_type());
+        let client_type = ClientType::from(value.receive_type());
         ModuleOperate {
             name: value.name,
             info: Some(SubmoduleInfo {
@@ -90,9 +90,9 @@ impl From<SubmoduleHeartbeat> for ModuleOperate {
     }
 }
 
-impl Into<SubmoduleType> for ConnectionType {
-    fn into(self) -> SubmoduleType {
-        match self {
+impl From<ConnectionType> for SubmoduleType {
+    fn from(value: ConnectionType) -> Self {
+        match value {
             ConnectionType::GrpcType => SubmoduleType::GrpcType,
             ConnectionType::PipeType => SubmoduleType::PipeType,
             ConnectionType::WindowsNamedPipeType => SubmoduleType::WindowsNamedPipeType,
@@ -101,9 +101,9 @@ impl Into<SubmoduleType> for ConnectionType {
     }
 }
 
-impl Into<ReceiveType> for ClientType {
-    fn into(self) -> ReceiveType {
-        match self {
+impl From<ClientType> for ReceiveType {
+    fn from(value: ClientType) -> Self {
+        match value {
             ClientType::BothType => ReceiveType::DefaultType,
             ClientType::InstructType => ReceiveType::JustInstructType,
             ClientType::ManipulateType => ReceiveType::JustManipulateType,
@@ -118,8 +118,8 @@ impl TryInto<SubmoduleReq> for ModuleOperate {
         if let Some(info) = self.info {
             Ok(SubmoduleReq {
                 name: self.name,
-                receive_type: <ClientType as Into<ReceiveType>>::into(info.client_type).into(),
-                submodule_type: <ConnectionType as Into<SubmoduleType>>::into(info.connection_type).into(),
+                receive_type: ReceiveType::from(info.client_type).into(),
+                submodule_type: SubmoduleType::from(info.connection_type).into(),
                 conn_params: info.conn_params,
                 default_instruct: info.default_instruct,
             })
@@ -134,14 +134,8 @@ impl TryInto<SubmoduleHeartbeat> for ModuleOperate {
 
     fn try_into(self) -> Result<SubmoduleHeartbeat, Self::Error> {
         match self.operate_type {
-            OperateType::Heartbeat => {
-                Ok(SubmoduleHeartbeat {
-                    name: self.name,
-                })
-            }
-            other_type => {
-                Err(NihilityCommonError::CreateSubmoduleHeartbeat(other_type))
-            }
+            OperateType::Heartbeat => Ok(SubmoduleHeartbeat { name: self.name }),
+            other_type => Err(NihilityCommonError::CreateSubmoduleHeartbeat(other_type)),
         }
     }
 }

@@ -26,4 +26,3 @@ pub enum NihilityCommonError {
     #[error("Tonic Status")]
     Status(#[from] tonic::Status),
 }
-

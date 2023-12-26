@@ -39,8 +39,7 @@ impl Default for GrpcServerConfig {
                     Ok(ipv4) => ipv4,
                     Err(e) => {
                         error!("Get Ipv4 Addr Error: {:?}", e);
-                        let ip = IpAddr::from_str(BIND_IP).unwrap();
-                        ip
+                        IpAddr::from_str(BIND_IP).unwrap()
                     }
                 }
             }

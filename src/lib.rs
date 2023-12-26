@@ -5,25 +5,13 @@ pub use communicat::grpc::{
 };
 pub use communicat::NihilityClient;
 pub use communicat::NihilityServer;
-pub use entity::instruct::{
-    InstructData,
-    InstructEntity,
-    InstructInfoEntity,
-    InstructType,
-};
+pub use entity::instruct::{InstructData, InstructEntity, InstructInfoEntity, InstructType};
 pub use entity::manipulate::{
-    ManipulateData,
-    ManipulateEntity,
-    ManipulateInfoEntity,
-    ManipulateType,
+    ManipulateData, ManipulateEntity, ManipulateInfoEntity, ManipulateType,
 };
 pub use entity::response::ResponseCode;
 pub use entity::submodule::{
-    ClientType,
-    ConnectionType,
-    ModuleOperate,
-    OperateType,
-    SubmoduleInfo,
+    ClientType, ConnectionType, ModuleOperate, OperateType, SubmoduleInfo,
 };
 
 mod communicat;

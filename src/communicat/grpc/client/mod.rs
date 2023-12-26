@@ -1,8 +1,8 @@
 use async_trait::async_trait;
 use tonic::transport::Channel;
 
-use crate::communicat::{NihilityClient};
 use crate::communicat::grpc::config::GrpcClientConfig;
+use crate::communicat::NihilityClient;
 use crate::error::WrapResult;
 use crate::instruct::instruct_client::InstructClient;
 use crate::manipulate::manipulate_client::ManipulateClient;
@@ -33,17 +33,20 @@ impl GrpcClient {
 #[async_trait]
 impl NihilityClient for GrpcClient {
     async fn connection_submodule_operate_server(&mut self) -> WrapResult<()> {
-        self.submodule_operate_client = Some(SubmoduleClient::connect(self.config.server_address.to_string()).await?);
+        self.submodule_operate_client =
+            Some(SubmoduleClient::connect(self.config.server_address.to_string()).await?);
         Ok(())
     }
 
     async fn connection_instruct_server(&mut self) -> WrapResult<()> {
-        self.instruct_client = Some(InstructClient::connect(self.config.server_address.to_string()).await?);
+        self.instruct_client =
+            Some(InstructClient::connect(self.config.server_address.to_string()).await?);
         Ok(())
     }
 
     async fn connection_manipulate_server(&mut self) -> WrapResult<()> {
-        self.manipulate_client = Some(ManipulateClient::connect(self.config.server_address.to_string()).await?);
+        self.manipulate_client =
+            Some(ManipulateClient::connect(self.config.server_address.to_string()).await?);
         Ok(())
     }
 }

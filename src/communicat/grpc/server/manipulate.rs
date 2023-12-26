@@ -1,15 +1,15 @@
 use tokio::spawn;
 use tokio::sync::mpsc;
 use tokio::sync::mpsc::UnboundedSender;
-use tokio_stream::StreamExt;
 use tokio_stream::wrappers::ReceiverStream;
+use tokio_stream::StreamExt;
 use tonic::{Request, Response, Status, Streaming};
 use tracing::error;
 
 use crate::communicat::grpc::server::StreamResp;
 use crate::entity::manipulate::ManipulateEntity;
-use crate::manipulate::{SimpleManipulate, TextDisplayManipulate};
 use crate::manipulate::manipulate_server::Manipulate;
+use crate::manipulate::{SimpleManipulate, TextDisplayManipulate};
 use crate::response_code::{Resp, RespCode};
 
 #[derive(Clone)]
@@ -25,9 +25,8 @@ impl Manipulate for ManipulateImpl {
     ) -> Result<Response<Resp>, Status> {
         match self
             .manipulate_sender
-            .send(ManipulateEntity::from(
-                request.into_inner(),
-            )) {
+            .send(ManipulateEntity::from(request.into_inner()))
+        {
             Ok(_) => Ok(Response::new(Resp {
                 code: RespCode::Success.into(),
             })),
@@ -47,9 +46,8 @@ impl Manipulate for ManipulateImpl {
     ) -> Result<Response<Resp>, Status> {
         match self
             .manipulate_sender
-            .send(ManipulateEntity::from(
-                request.into_inner(),
-            )) {
+            .send(ManipulateEntity::from(request.into_inner()))
+        {
             Ok(_) => Ok(Response::new(Resp {
                 code: RespCode::Success.into(),
             })),
@@ -71,14 +69,12 @@ impl Manipulate for ManipulateImpl {
     ) -> Result<Response<Self::SendMultipleTextDisplayManipulateStream>, Status> {
         let mut req_stream = request.into_inner();
         let (tx, rx) = mpsc::channel(128);
-        let manipualte_sender = self.manipulate_sender.clone();
+        let manipulate_sender = self.manipulate_sender.clone();
         spawn(async move {
             while let Some(result) = req_stream.next().await {
                 match result {
                     Ok(manipulate) => {
-                        match manipualte_sender
-                            .send(ManipulateEntity::from(manipulate))
-                        {
+                        match manipulate_sender.send(ManipulateEntity::from(manipulate)) {
                             Ok(_) => {
                                 match tx
                                     .send(Ok(Resp {

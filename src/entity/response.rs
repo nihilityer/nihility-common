@@ -17,9 +17,9 @@ impl From<RespCode> for ResponseCode {
     }
 }
 
-impl Into<RespCode> for ResponseCode {
-    fn into(self) -> RespCode {
-        match self {
+impl From<ResponseCode> for RespCode {
+    fn from(value: ResponseCode) -> Self {
+        match value {
             ResponseCode::Success => RespCode::Success,
             ResponseCode::UnknownError => RespCode::UnknownError,
             ResponseCode::UnableToProcess => RespCode::UnableToProcess,

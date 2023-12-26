@@ -6,8 +6,8 @@ use tokio::spawn;
 use tokio::sync::mpsc::UnboundedSender;
 use tokio_util::sync::CancellationToken;
 use tonic::codegen::tokio_stream::Stream;
-use tonic::Status;
 use tonic::transport::Server;
+use tonic::Status;
 use tracing::{error, info};
 
 use crate::communicat::grpc::config::GrpcServerConfig;
@@ -28,7 +28,7 @@ mod instruct;
 mod manipulate;
 mod submodule;
 
-type StreamResp = Pin<Box<dyn Stream<Item=Result<Resp, Status>> + Send>>;
+type StreamResp = Pin<Box<dyn Stream<Item = Result<Resp, Status>> + Send>>;
 
 pub struct GrpcServer {
     server_config: GrpcServerConfig,
@@ -39,7 +39,10 @@ pub struct GrpcServer {
 }
 
 impl GrpcServer {
-    pub fn init(grpc_server_config: GrpcServerConfig, cancellation_token: CancellationToken) -> Self {
+    pub fn init(
+        grpc_server_config: GrpcServerConfig,
+        cancellation_token: CancellationToken,
+    ) -> Self {
         GrpcServer {
             server_config: grpc_server_config,
             cancellation_token,
@@ -52,25 +55,37 @@ impl GrpcServer {
 
 #[async_trait]
 impl NihilityServer for GrpcServer {
-    fn set_submodule_operate_sender(&mut self, submodule_sender: UnboundedSender<ModuleOperate>) -> WrapResult<()> {
-        self.submodule_operate_server = Some(SubmoduleServer::new(SubmoduleImpl::init(submodule_sender)));
+    fn set_submodule_operate_sender(
+        &mut self,
+        submodule_sender: UnboundedSender<ModuleOperate>,
+    ) -> WrapResult<()> {
+        self.submodule_operate_server =
+            Some(SubmoduleServer::new(SubmoduleImpl::init(submodule_sender)));
         Ok(())
     }
 
-    fn set_instruct_sender(&mut self, instruct_sender: UnboundedSender<InstructEntity>) -> WrapResult<()> {
+    fn set_instruct_sender(
+        &mut self,
+        instruct_sender: UnboundedSender<InstructEntity>,
+    ) -> WrapResult<()> {
         self.instruct_server = Some(InstructServer::new(InstructImpl::init(instruct_sender)));
         Ok(())
     }
 
-    fn set_manipulate_sender(&mut self, manipulate_sender: UnboundedSender<ManipulateEntity>) -> WrapResult<()> {
-        self.manipulate_server = Some(ManipulateServer::new(ManipulateImpl::init(manipulate_sender)));
+    fn set_manipulate_sender(
+        &mut self,
+        manipulate_sender: UnboundedSender<ManipulateEntity>,
+    ) -> WrapResult<()> {
+        self.manipulate_server = Some(ManipulateServer::new(ManipulateImpl::init(
+            manipulate_sender,
+        )));
         Ok(())
     }
 
     fn start(&mut self) -> WrapResult<()> {
         let bind_addr = match self.server_config.bind_ip {
             IpAddr::V4(ip) => format!("{}:{}", ip, self.server_config.bind_port),
-            IpAddr::V6(ip) => format!("[{}]:{}", ip, self.server_config.bind_port)
+            IpAddr::V6(ip) => format!("[{}]:{}", ip, self.server_config.bind_port),
         };
         info!("Grpc Server Bind At {}", &bind_addr);
         let server_cancellation_token = self.cancellation_token.clone();

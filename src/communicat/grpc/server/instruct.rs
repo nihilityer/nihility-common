@@ -2,8 +2,8 @@ use tokio::spawn;
 use tokio::sync::mpsc;
 use tokio::sync::mpsc::UnboundedSender;
 use tokio_stream::wrappers::ReceiverStream;
-use tonic::{Request, Response, Status, Streaming};
 use tonic::codegen::tokio_stream::StreamExt;
+use tonic::{Request, Response, Status, Streaming};
 use tracing::error;
 
 use crate::communicat::grpc::server::StreamResp;
@@ -33,9 +33,8 @@ impl Instruct for InstructImpl {
     ) -> Result<Response<Resp>, Status> {
         match self
             .instruct_sender
-            .send(InstructEntity::from(
-                request.into_inner(),
-            )) {
+            .send(InstructEntity::from(request.into_inner()))
+        {
             Ok(_) => Ok(Response::new(Resp {
                 code: RespCode::Success.into(),
             })),
@@ -58,41 +57,37 @@ impl Instruct for InstructImpl {
         spawn(async move {
             while let Some(result) = req_stream.next().await {
                 match result {
-                    Ok(instruct) => {
-                        match instruct_sender
-                            .send(InstructEntity::from(instruct))
-                        {
-                            Ok(_) => {
-                                match tx
-                                    .send(Ok(Resp {
-                                        code: RespCode::Success.into(),
-                                    }))
-                                    .await
-                                {
-                                    Ok(_) => {}
-                                    Err(e) => {
-                                        error!("Instruct Server send_multiple_text_instruct Send To Stream Error: {:?}", e);
-                                        break;
-                                    }
-                                }
-                            }
-                            Err(e) => {
-                                error!("Instruct Server send_multiple_text_instruct Send To Core Error: {:?}", e);
-                                match tx
-                                    .send(Ok(Resp {
-                                        code: RespCode::UnknownError.into(),
-                                    }))
-                                    .await
-                                {
-                                    Ok(_) => {}
-                                    Err(e) => {
-                                        error!("Instruct Server send_multiple_text_instruct Send To Stream Error: {:?}", e);
-                                        break;
-                                    }
+                    Ok(instruct) => match instruct_sender.send(InstructEntity::from(instruct)) {
+                        Ok(_) => {
+                            match tx
+                                .send(Ok(Resp {
+                                    code: RespCode::Success.into(),
+                                }))
+                                .await
+                            {
+                                Ok(_) => {}
+                                Err(e) => {
+                                    error!("Instruct Server send_multiple_text_instruct Send To Stream Error: {:?}", e);
+                                    break;
                                 }
                             }
                         }
-                    }
+                        Err(e) => {
+                            error!("Instruct Server send_multiple_text_instruct Send To Core Error: {:?}", e);
+                            match tx
+                                .send(Ok(Resp {
+                                    code: RespCode::UnknownError.into(),
+                                }))
+                                .await
+                            {
+                                Ok(_) => {}
+                                Err(e) => {
+                                    error!("Instruct Server send_multiple_text_instruct Send To Stream Error: {:?}", e);
+                                    break;
+                                }
+                            }
+                        }
+                    },
                     Err(e) => {
                         error!(
                             "Instruct Server send_multiple_text_instruct Receive Error: {:?}",

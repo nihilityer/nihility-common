@@ -9,7 +9,6 @@ use crate::error::{NihilityCommonError, WrapResult};
 
 pub mod grpc;
 
-
 #[async_trait]
 pub trait NihilityClient: SendManipulateOperate + SendInstructOperate + SubmoduleOperate {
     async fn connection_submodule_operate_server(&mut self) -> WrapResult<()>;
@@ -19,25 +18,33 @@ pub trait NihilityClient: SendManipulateOperate + SendInstructOperate + Submodul
         if self.is_submodule_operate_client_connected() {
             return self.send_register(operate).await;
         }
-        Err(NihilityCommonError::NotConnected("Submodule Operate".to_string()))
+        Err(NihilityCommonError::NotConnected(
+            "Submodule Operate".to_string(),
+        ))
     }
     async fn heartbeat(&self, operate: ModuleOperate) -> WrapResult<ResponseCode> {
         if self.is_submodule_operate_client_connected() {
             return self.send_heartbeat(operate).await;
         }
-        Err(NihilityCommonError::NotConnected("Submodule Operate".to_string()))
+        Err(NihilityCommonError::NotConnected(
+            "Submodule Operate".to_string(),
+        ))
     }
     async fn offline(&self, operate: ModuleOperate) -> WrapResult<ResponseCode> {
         if self.is_submodule_operate_client_connected() {
             return self.send_offline(operate).await;
         }
-        Err(NihilityCommonError::NotConnected("Submodule Operate".to_string()))
+        Err(NihilityCommonError::NotConnected(
+            "Submodule Operate".to_string(),
+        ))
     }
     async fn update(&self, operate: ModuleOperate) -> WrapResult<ResponseCode> {
         if self.is_submodule_operate_client_connected() {
             return self.send_update(operate).await;
         }
-        Err(NihilityCommonError::NotConnected("Submodule Operate".to_string()))
+        Err(NihilityCommonError::NotConnected(
+            "Submodule Operate".to_string(),
+        ))
     }
     async fn text_instruct(&self, instruct: InstructEntity) -> WrapResult<ResponseCode> {
         if self.is_instruct_client_connected() {
@@ -60,7 +67,10 @@ pub trait NihilityClient: SendManipulateOperate + SendInstructOperate + Submodul
         }
         Err(NihilityCommonError::NotConnected("Manipulate".to_string()))
     }
-    async fn text_display_manipulate(&self, manipulate: ManipulateEntity) -> WrapResult<ResponseCode> {
+    async fn text_display_manipulate(
+        &self,
+        manipulate: ManipulateEntity,
+    ) -> WrapResult<ResponseCode> {
         if self.is_manipulate_client_connected() {
             return self.send_text_display_manipulate(manipulate).await;
         }
@@ -71,7 +81,9 @@ pub trait NihilityClient: SendManipulateOperate + SendInstructOperate + Submodul
         manipulate_stream: Receiver<ManipulateEntity>,
     ) -> WrapResult<Receiver<ResponseCode>> {
         if self.is_manipulate_client_connected() {
-            return self.send_multiple_text_display_manipulate(manipulate_stream).await;
+            return self
+                .send_multiple_text_display_manipulate(manipulate_stream)
+                .await;
         }
         Err(NihilityCommonError::NotConnected("Manipulate".to_string()))
     }
@@ -79,11 +91,20 @@ pub trait NihilityClient: SendManipulateOperate + SendInstructOperate + Submodul
 
 #[async_trait]
 pub trait NihilityServer {
-    fn set_submodule_operate_sender(&mut self, submodule_sender: UnboundedSender<ModuleOperate>) -> WrapResult<()>;
+    fn set_submodule_operate_sender(
+        &mut self,
+        submodule_sender: UnboundedSender<ModuleOperate>,
+    ) -> WrapResult<()>;
 
-    fn set_instruct_sender(&mut self, instruct_sender: UnboundedSender<InstructEntity>) -> WrapResult<()>;
+    fn set_instruct_sender(
+        &mut self,
+        instruct_sender: UnboundedSender<InstructEntity>,
+    ) -> WrapResult<()>;
 
-    fn set_manipulate_sender(&mut self, manipulate_sender: UnboundedSender<ManipulateEntity>) -> WrapResult<()>;
+    fn set_manipulate_sender(
+        &mut self,
+        manipulate_sender: UnboundedSender<ManipulateEntity>,
+    ) -> WrapResult<()>;
 
     fn start(&mut self) -> WrapResult<()>;
 }
@@ -110,8 +131,14 @@ pub trait SendInstructOperate {
 #[async_trait]
 pub trait SendManipulateOperate {
     fn is_manipulate_client_connected(&self) -> bool;
-    async fn send_simple_manipulate(&self, manipulate: ManipulateEntity) -> WrapResult<ResponseCode>;
-    async fn send_text_display_manipulate(&self, manipulate: ManipulateEntity) -> WrapResult<ResponseCode>;
+    async fn send_simple_manipulate(
+        &self,
+        manipulate: ManipulateEntity,
+    ) -> WrapResult<ResponseCode>;
+    async fn send_text_display_manipulate(
+        &self,
+        manipulate: ManipulateEntity,
+    ) -> WrapResult<ResponseCode>;
     async fn send_multiple_text_display_manipulate(
         &self,
         manipulate_stream: Receiver<ManipulateEntity>,

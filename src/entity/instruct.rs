@@ -36,9 +36,9 @@ impl From<Type> for InstructType {
     }
 }
 
-impl Into<Type> for InstructType {
-    fn into(self) -> Type {
-        match self {
+impl From<InstructType> for Type {
+    fn from(value: InstructType) -> Self {
+        match value {
             InstructType::DefaultType => Type::DefaultType,
             InstructType::SpecialType => Type::SpecialType,
             InstructType::WaitNextType => Type::WaitNextType,
@@ -64,11 +64,11 @@ impl From<InstructInfo> for InstructInfoEntity {
     }
 }
 
-impl Into<InstructInfo> for InstructInfoEntity {
-    fn into(self) -> InstructInfo {
+impl From<InstructInfoEntity> for InstructInfo {
+    fn from(value: InstructInfoEntity) -> Self {
         InstructInfo {
-            instruct_type: <InstructType as Into<Type>>::into(self.instruct_type).into(),
-            receive_manipulate_submodule: self.receive_manipulate_submodule,
+            instruct_type: Type::from(value.instruct_type).into(),
+            receive_manipulate_submodule: value.receive_manipulate_submodule,
         }
     }
 }
@@ -76,18 +76,14 @@ impl Into<InstructInfo> for InstructInfoEntity {
 impl From<TextInstruct> for InstructEntity {
     fn from(value: TextInstruct) -> Self {
         match value.info {
-            None => {
-                InstructEntity {
-                    info: InstructInfoEntity::default(),
-                    instruct: InstructData::Text(value.instruct),
-                }
-            }
-            Some(info) => {
-                InstructEntity {
-                    info: info.into(),
-                    instruct: InstructData::Text(value.instruct),
-                }
-            }
+            None => InstructEntity {
+                info: InstructInfoEntity::default(),
+                instruct: InstructData::Text(value.instruct),
+            },
+            Some(info) => InstructEntity {
+                info: info.into(),
+                instruct: InstructData::Text(value.instruct),
+            },
         }
     }
 }
@@ -97,12 +93,10 @@ impl TryInto<TextInstruct> for InstructEntity {
 
     fn try_into(self) -> Result<TextInstruct, Self::Error> {
         match self.instruct {
-            InstructData::Text(text) => {
-                Ok(TextInstruct {
-                    info: Some(self.info.into()),
-                    instruct: text,
-                })
-            }
+            InstructData::Text(text) => Ok(TextInstruct {
+                info: Some(self.info.into()),
+                instruct: text,
+            }),
         }
     }
 }

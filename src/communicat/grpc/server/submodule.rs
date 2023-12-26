@@ -3,8 +3,8 @@ use tonic::{Request, Response, Status};
 
 use crate::entity::submodule::{ModuleOperate, OperateType};
 use crate::response_code::{Resp, RespCode};
-use crate::submodule::{SubmoduleHeartbeat, SubmoduleReq};
 use crate::submodule::submodule_server::Submodule;
+use crate::submodule::{SubmoduleHeartbeat, SubmoduleReq};
 
 #[derive(Clone)]
 pub struct SubmoduleImpl {
@@ -24,9 +24,7 @@ impl Submodule for SubmoduleImpl {
     async fn register(&self, request: Request<SubmoduleReq>) -> Result<Response<Resp>, Status> {
         let mut operate = ModuleOperate::from(request.into_inner());
         operate.operate_type = OperateType::Register;
-        self.operate_module_sender
-            .send(operate)
-            .unwrap();
+        self.operate_module_sender.send(operate).unwrap();
         Ok(Response::new(Resp {
             code: RespCode::Success.into(),
         }))
@@ -35,15 +33,16 @@ impl Submodule for SubmoduleImpl {
     async fn offline(&self, request: Request<SubmoduleReq>) -> Result<Response<Resp>, Status> {
         let mut operate = ModuleOperate::from(request.into_inner());
         operate.operate_type = OperateType::Offline;
-        self.operate_module_sender
-            .send(operate)
-            .unwrap();
+        self.operate_module_sender.send(operate).unwrap();
         Ok(Response::new(Resp {
             code: RespCode::Success.into(),
         }))
     }
 
-    async fn heartbeat(&self, request: Request<SubmoduleHeartbeat>) -> Result<Response<Resp>, Status> {
+    async fn heartbeat(
+        &self,
+        request: Request<SubmoduleHeartbeat>,
+    ) -> Result<Response<Resp>, Status> {
         self.operate_module_sender
             .send(ModuleOperate::from(request.into_inner()))
             .unwrap();
@@ -55,9 +54,7 @@ impl Submodule for SubmoduleImpl {
     async fn update(&self, request: Request<SubmoduleReq>) -> Result<Response<Resp>, Status> {
         let mut operate = ModuleOperate::from(request.into_inner());
         operate.operate_type = OperateType::Update;
-        self.operate_module_sender
-            .send(operate)
-            .unwrap();
+        self.operate_module_sender.send(operate).unwrap();
         Ok(Response::new(Resp {
             code: RespCode::Success.into(),
         }))
