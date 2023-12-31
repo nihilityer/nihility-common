@@ -8,12 +8,11 @@ use crate::manipulate::{
 #[derive(Debug, Clone)]
 pub enum ManipulateType {
     DefaultType,
-    SpecialType,
     OfflineType,
-    DiscontinueType,
-    CancelType,
     ConfirmType,
-    WaitNextType,
+    CancelType,
+    ConnectionType,
+    DisconnectionType,
 }
 
 #[derive(Debug, Clone)]
@@ -40,12 +39,11 @@ impl From<Type> for ManipulateType {
     fn from(value: Type) -> Self {
         match value {
             Type::DefaultType => ManipulateType::DefaultType,
-            Type::SpecialType => ManipulateType::SpecialType,
             Type::OfflineType => ManipulateType::OfflineType,
-            Type::DiscontinueType => ManipulateType::DiscontinueType,
-            Type::CancelType => ManipulateType::CancelType,
             Type::ConfirmType => ManipulateType::ConfirmType,
-            Type::WaitNextType => ManipulateType::WaitNextType,
+            Type::CancelType => ManipulateType::CancelType,
+            Type::ConnectionType => ManipulateType::ConnectionType,
+            Type::DisconnectionType => ManipulateType::DisconnectionType,
         }
     }
 }
@@ -54,12 +52,11 @@ impl From<ManipulateType> for Type {
     fn from(value: ManipulateType) -> Self {
         match value {
             ManipulateType::DefaultType => Type::DefaultType,
-            ManipulateType::SpecialType => Type::SpecialType,
             ManipulateType::OfflineType => Type::OfflineType,
-            ManipulateType::DiscontinueType => Type::DiscontinueType,
-            ManipulateType::CancelType => Type::CancelType,
             ManipulateType::ConfirmType => Type::ConfirmType,
-            ManipulateType::WaitNextType => Type::WaitNextType,
+            ManipulateType::CancelType => Type::CancelType,
+            ManipulateType::ConnectionType => Type::ConnectionType,
+            ManipulateType::DisconnectionType => Type::DisconnectionType,
         }
     }
 }
