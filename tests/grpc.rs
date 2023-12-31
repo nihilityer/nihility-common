@@ -12,7 +12,9 @@ use tracing::{error, info, Level};
 
 use nihility_common::{
     ClientType, ConnParams, ConnectionType, GrpcClient, GrpcClientConfig, GrpcServer,
-    GrpcServerConfig, ModuleOperate, NihilityClient, NihilityServer, OperateType, SubmoduleInfo,
+    GrpcServerConfig, InstructData, InstructEntity, InstructInfoEntity, ManipulateData,
+    ManipulateEntity, ManipulateInfoEntity, ModuleOperate, NihilityClient, NihilityServer,
+    OperateType, SubmoduleInfo,
 };
 
 #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
@@ -30,13 +32,34 @@ async fn test_grpc_server() {
     let client_config = GrpcClientConfig::try_from(connection_params.clone()).unwrap();
     info!("client_config: {:?}", &client_config);
     let mut server = GrpcServer::init(server_config, CancellationToken::new());
-    let (tx, mut rx) = mpsc::unbounded_channel();
-    server.set_submodule_operate_sender(tx).unwrap();
+    let (module_tx, mut module_rx) = mpsc::unbounded_channel();
+    let (instruct_tx, mut instruct_rx) = mpsc::unbounded_channel();
+    let (manipulate_tx, mut manipulate_rx) = mpsc::unbounded_channel();
+    server.set_submodule_operate_sender(module_tx).unwrap();
+    server.set_instruct_sender(instruct_tx).unwrap();
+    server.set_manipulate_sender(manipulate_tx).unwrap();
     server.start().unwrap();
     tokio::time::sleep(Duration::from_secs(10)).await;
-    match rx.try_recv() {
+    info!("Start Receiver");
+    match module_rx.try_recv() {
         Ok(operate) => {
-            info!("operate: {:?}", operate);
+            info!("Module Operate: {:?}", operate);
+        }
+        Err(e) => {
+            error!("error: {}", e)
+        }
+    }
+    match instruct_rx.try_recv() {
+        Ok(instruct) => {
+            info!("Instruct: {:?}", instruct);
+        }
+        Err(e) => {
+            error!("error: {}", e)
+        }
+    }
+    match manipulate_rx.try_recv() {
+        Ok(manipulate) => {
+            info!("Manipulate: {:?}", manipulate);
         }
         Err(e) => {
             error!("error: {}", e)
@@ -50,6 +73,8 @@ async fn test_grpc_client() {
     let config = GrpcClientConfig::default();
     let mut client = GrpcClient::init(config);
     client.connection_submodule_operate_server().await.unwrap();
+    client.connection_instruct_server().await.unwrap();
+    client.connection_manipulate_server().await.unwrap();
     client
         .register(ModuleOperate {
             name: String::from("test"),
@@ -62,6 +87,20 @@ async fn test_grpc_client() {
                 },
             }),
             operate_type: OperateType::Register,
+        })
+        .await
+        .unwrap();
+    client
+        .text_instruct(InstructEntity {
+            info: InstructInfoEntity::default(),
+            instruct: InstructData::Text(String::from("test send instruct")),
+        })
+        .await
+        .unwrap();
+    client
+        .simple_manipulate(ManipulateEntity {
+            info: ManipulateInfoEntity::default(),
+            manipulate: ManipulateData::Simple,
         })
         .await
         .unwrap();
