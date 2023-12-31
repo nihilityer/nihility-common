@@ -18,6 +18,7 @@ pub enum ClientType {
     BothType,
     InstructType,
     ManipulateType,
+    NotReceiveType,
 }
 
 #[derive(Debug)]
@@ -66,6 +67,7 @@ impl From<ReceiveType> for ClientType {
             ReceiveType::DefaultType => ClientType::BothType,
             ReceiveType::JustInstructType => ClientType::InstructType,
             ReceiveType::JustManipulateType => ClientType::ManipulateType,
+            ReceiveType::NotReceiveType => ClientType::NotReceiveType,
         }
     }
 }
@@ -97,19 +99,15 @@ impl TryFrom<SubmoduleReq> for ModuleOperate {
 
     fn try_from(value: SubmoduleReq) -> Result<Self, Self::Error> {
         match value.connection_params {
-            None => {
-                Err(NihilityCommonError::CreateSubmoduleReq)
-            }
-            Some(connection_params) => {
-                Ok(ModuleOperate {
-                    name: value.name,
-                    info: Some(SubmoduleInfo {
-                        default_instruct: value.default_instruct,
-                        conn_params: ConnParams::from(connection_params),
-                    }),
-                    operate_type: OperateType::Undefined,
-                })
-            }
+            None => Err(NihilityCommonError::CreateSubmoduleReq),
+            Some(connection_params) => Ok(ModuleOperate {
+                name: value.name,
+                info: Some(SubmoduleInfo {
+                    default_instruct: value.default_instruct,
+                    conn_params: ConnParams::from(connection_params),
+                }),
+                operate_type: OperateType::Undefined,
+            }),
         }
     }
 }
@@ -141,6 +139,7 @@ impl From<ClientType> for ReceiveType {
             ClientType::BothType => ReceiveType::DefaultType,
             ClientType::InstructType => ReceiveType::JustInstructType,
             ClientType::ManipulateType => ReceiveType::JustManipulateType,
+            ClientType::NotReceiveType => ReceiveType::NotReceiveType,
         }
     }
 }

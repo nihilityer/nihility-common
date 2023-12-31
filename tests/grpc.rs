@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 use std::net::IpAddr;
 use std::str::FromStr;
 use std::time::Duration;
@@ -10,7 +11,8 @@ use tokio_util::sync::CancellationToken;
 use tracing::{error, info, Level};
 
 use nihility_common::{
-    GrpcClient, GrpcClientConfig, GrpcServer, GrpcServerConfig, NihilityClient, NihilityServer,
+    ClientType, ConnParams, ConnectionType, GrpcClient, GrpcClientConfig, GrpcServer,
+    GrpcServerConfig, ModuleOperate, NihilityClient, NihilityServer, OperateType, SubmoduleInfo,
 };
 
 #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
@@ -48,6 +50,21 @@ async fn test_grpc_client() {
     let config = GrpcClientConfig::default();
     let mut client = GrpcClient::init(config);
     client.connection_submodule_operate_server().await.unwrap();
+    client
+        .register(ModuleOperate {
+            name: String::from("test"),
+            info: Some(SubmoduleInfo {
+                default_instruct: vec![String::from("test_instruct")],
+                conn_params: ConnParams {
+                    connection_type: ConnectionType::GrpcType,
+                    client_type: ClientType::NotReceiveType,
+                    conn_params: HashMap::new(),
+                },
+            }),
+            operate_type: OperateType::Register,
+        })
+        .await
+        .unwrap();
     info!("Connection Success!");
 }
 

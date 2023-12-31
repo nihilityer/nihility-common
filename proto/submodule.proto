@@ -22,6 +22,7 @@ enum ReceiveType {
   DEFAULT_TYPE = 0;
   JUST_INSTRUCT_TYPE = 1;
   JUST_MANIPULATE_TYPE = 2;
+  NOT_RECEIVE_TYPE = 3;
 }
 
 message ConnectionParams {

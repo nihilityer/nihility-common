@@ -11,7 +11,7 @@ pub use entity::manipulate::{
 };
 pub use entity::response::ResponseCode;
 pub use entity::submodule::{
-    ClientType, ConnectionType, ModuleOperate, OperateType, SubmoduleInfo,
+    ClientType, ConnParams, ConnectionType, ModuleOperate, OperateType, SubmoduleInfo,
 };
 
 mod communicat;
