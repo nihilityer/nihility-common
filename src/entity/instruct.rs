@@ -1,5 +1,6 @@
 use crate::error::NihilityCommonError;
 use crate::instruct::{InstructInfo, TextInstruct, Type};
+use uuid::Uuid;
 
 #[derive(Debug)]
 pub enum InstructType {
@@ -10,6 +11,7 @@ pub enum InstructType {
 
 #[derive(Debug)]
 pub struct InstructInfoEntity {
+    pub instruct_id: String,
     pub instruct_type: InstructType,
     pub receive_manipulate_submodule: String,
 }
@@ -49,6 +51,7 @@ impl From<InstructType> for Type {
 impl Default for InstructInfoEntity {
     fn default() -> Self {
         InstructInfoEntity {
+            instruct_id: Uuid::new_v4().to_string(),
             instruct_type: InstructType::DefaultType,
             receive_manipulate_submodule: String::default(),
         }
@@ -59,6 +62,7 @@ impl From<InstructInfo> for InstructInfoEntity {
     fn from(value: InstructInfo) -> Self {
         InstructInfoEntity {
             instruct_type: InstructType::from(value.instruct_type()),
+            instruct_id: value.instruct_id,
             receive_manipulate_submodule: value.receive_manipulate_submodule,
         }
     }
@@ -67,6 +71,7 @@ impl From<InstructInfo> for InstructInfoEntity {
 impl From<InstructInfoEntity> for InstructInfo {
     fn from(value: InstructInfoEntity) -> Self {
         InstructInfo {
+            instruct_id: value.instruct_id,
             instruct_type: Type::from(value.instruct_type).into(),
             receive_manipulate_submodule: value.receive_manipulate_submodule,
         }

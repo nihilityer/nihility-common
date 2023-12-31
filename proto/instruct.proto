@@ -16,7 +16,8 @@ service Instruct {
 }
 
 message InstructInfo {
-  Type instruct_type = 1;
+  string instruct_id = 1;
+  Type instruct_type = 2;
   string receive_manipulate_submodule = 3;
 }
 

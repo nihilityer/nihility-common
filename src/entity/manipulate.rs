@@ -4,6 +4,7 @@ use crate::error::NihilityCommonError::CreateManipulateReq;
 use crate::manipulate::{
     DirectConnectionManipulate, ManipulateInfo, SimpleManipulate, TextDisplayManipulate, Type,
 };
+use uuid::Uuid;
 
 #[derive(Debug, Clone)]
 pub enum ManipulateType {
@@ -17,6 +18,7 @@ pub enum ManipulateType {
 
 #[derive(Debug, Clone)]
 pub struct ManipulateInfoEntity {
+    pub manipulate_id: String,
     pub manipulate_type: ManipulateType,
     pub use_module_name: String,
 }
@@ -64,6 +66,7 @@ impl From<ManipulateType> for Type {
 impl Default for ManipulateInfoEntity {
     fn default() -> Self {
         ManipulateInfoEntity {
+            manipulate_id: Uuid::new_v4().to_string(),
             manipulate_type: ManipulateType::DefaultType,
             use_module_name: String::default(),
         }
@@ -74,6 +77,7 @@ impl From<ManipulateInfo> for ManipulateInfoEntity {
     fn from(value: ManipulateInfo) -> Self {
         ManipulateInfoEntity {
             manipulate_type: ManipulateType::from(value.manipulate_type()),
+            manipulate_id: value.manipulate_id,
             use_module_name: value.use_module_name,
         }
     }
@@ -82,6 +86,7 @@ impl From<ManipulateInfo> for ManipulateInfoEntity {
 impl From<ManipulateInfoEntity> for ManipulateInfo {
     fn from(value: ManipulateInfoEntity) -> Self {
         ManipulateInfo {
+            manipulate_id: value.manipulate_id,
             manipulate_type: Type::from(value.manipulate_type).into(),
             use_module_name: value.use_module_name,
         }

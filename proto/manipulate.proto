@@ -22,8 +22,9 @@ service Manipulate {
 }
 
 message ManipulateInfo {
-  Type manipulate_type = 1;
-  string use_module_name = 2;
+  string manipulate_id = 1;
+  Type manipulate_type = 2;
+  string use_module_name = 3;
 }
 
 message SimpleManipulate {
