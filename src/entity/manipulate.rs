@@ -1,10 +1,12 @@
+use uuid::Uuid;
+
 use crate::entity::submodule::ConnParams;
 use crate::error::NihilityCommonError;
 use crate::error::NihilityCommonError::CreateManipulateReq;
 use crate::manipulate::{
     DirectConnectionManipulate, ManipulateInfo, SimpleManipulate, TextDisplayManipulate, Type,
 };
-use uuid::Uuid;
+use crate::submodule::ConnectionParams;
 
 #[derive(Debug, Clone)]
 pub enum ManipulateType {
@@ -168,6 +170,20 @@ impl TryFrom<DirectConnectionManipulate> for ManipulateEntity {
                     manipulate: ManipulateData::Simple,
                 },
             }),
+        }
+    }
+}
+
+impl TryInto<DirectConnectionManipulate> for ManipulateEntity {
+    type Error = NihilityCommonError;
+
+    fn try_into(self) -> Result<DirectConnectionManipulate, Self::Error> {
+        match self.manipulate {
+            ManipulateData::ConnectionParams(connection_params) => Ok(DirectConnectionManipulate {
+                info: Some(self.info.into()),
+                connection_params: Some(ConnectionParams::from(*connection_params)),
+            }),
+            other_type => Err(CreateManipulateReq(other_type)),
         }
     }
 }

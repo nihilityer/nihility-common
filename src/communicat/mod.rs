@@ -87,6 +87,15 @@ pub trait NihilityClient: SendManipulateOperate + SendInstructOperate + Submodul
         }
         Err(NihilityCommonError::NotConnected("Manipulate".to_string()))
     }
+    async fn direct_connection_manipulate(
+        &self,
+        manipulate: ManipulateEntity,
+    ) -> WrapResult<ResponseCode> {
+        if self.is_manipulate_client_connected() {
+            return self.send_direct_connection_manipulate(manipulate).await;
+        }
+        Err(NihilityCommonError::NotConnected("Manipulate".to_string()))
+    }
 }
 
 #[async_trait]
@@ -143,4 +152,8 @@ pub trait SendManipulateOperate {
         &self,
         manipulate_stream: Receiver<ManipulateEntity>,
     ) -> WrapResult<Receiver<ResponseCode>>;
+    async fn send_direct_connection_manipulate(
+        &self,
+        manipulate: ManipulateEntity,
+    ) -> WrapResult<ResponseCode>;
 }

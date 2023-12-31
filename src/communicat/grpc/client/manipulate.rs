@@ -115,4 +115,16 @@ impl SendManipulateOperate for GrpcClient {
         });
         Ok(out_rx)
     }
+
+    async fn send_direct_connection_manipulate(&self, manipulate: ManipulateEntity) -> WrapResult<ResponseCode> {
+        Ok(ResponseCode::from(
+            self.manipulate_client
+                .clone()
+                .unwrap()
+                .send_direct_connection_manipulate(Request::new(manipulate.try_into()?))
+                .await?
+                .into_inner()
+                .code(),
+        ))
+    }
 }
