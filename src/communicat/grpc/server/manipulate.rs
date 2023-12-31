@@ -1,15 +1,15 @@
 use tokio::spawn;
 use tokio::sync::mpsc;
 use tokio::sync::mpsc::UnboundedSender;
-use tokio_stream::wrappers::ReceiverStream;
 use tokio_stream::StreamExt;
+use tokio_stream::wrappers::ReceiverStream;
 use tonic::{Request, Response, Status, Streaming};
 use tracing::error;
 
 use crate::communicat::grpc::server::StreamResp;
 use crate::entity::manipulate::ManipulateEntity;
+use crate::manipulate::{DirectConnectionManipulate, SimpleManipulate, TextDisplayManipulate};
 use crate::manipulate::manipulate_server::Manipulate;
-use crate::manipulate::{SimpleManipulate, TextDisplayManipulate};
 use crate::response_code::{Resp, RespCode};
 
 #[derive(Clone)]
@@ -125,6 +125,33 @@ impl Manipulate for ManipulateImpl {
         Ok(Response::new(
             Box::pin(ReceiverStream::new(rx)) as Self::SendMultipleTextDisplayManipulateStream
         ))
+    }
+
+    async fn send_direct_connection_manipulate(
+        &self,
+        request: Request<DirectConnectionManipulate>,
+    ) -> Result<Response<Resp>, Status> {
+        match ManipulateEntity::try_from(request.into_inner()) {
+            Ok(entity) => match self.manipulate_sender.send(entity) {
+                Ok(_) => Ok(Response::new(Resp {
+                    code: RespCode::Success.into(),
+                })),
+                Err(e) => {
+                    error!(
+                        "Grpc Manipulate Server send_direct_connection_manipulate Error: {:?}",
+                        &e
+                    );
+                    Err(Status::from_error(Box::new(e)))
+                }
+            },
+            Err(e) => {
+                error!(
+                    "Grpc Manipulate Server send_direct_connection_manipulate Error: {:?}",
+                    &e
+                );
+                Err(Status::from_error(Box::new(e)))
+            }
+        }
     }
 }
 

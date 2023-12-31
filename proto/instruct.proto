@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-import public "response_code.proto";
+import "response_code.proto";
 
 package instruct;
 

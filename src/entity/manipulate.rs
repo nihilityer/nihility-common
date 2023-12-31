@@ -1,6 +1,9 @@
+use crate::entity::submodule::ConnParams;
 use crate::error::NihilityCommonError;
 use crate::error::NihilityCommonError::CreateManipulateReq;
-use crate::manipulate::{ManipulateInfo, SimpleManipulate, TextDisplayManipulate, Type};
+use crate::manipulate::{
+    DirectConnectionManipulate, ManipulateInfo, SimpleManipulate, TextDisplayManipulate, Type,
+};
 
 #[derive(Debug, Clone)]
 pub enum ManipulateType {
@@ -23,6 +26,7 @@ pub struct ManipulateInfoEntity {
 pub enum ManipulateData {
     Text(String),
     Simple,
+    ConnectionParams(Box<ConnParams>),
 }
 
 /// 核心模块内部传递的操作实体
@@ -140,6 +144,28 @@ impl TryInto<SimpleManipulate> for ManipulateEntity {
                 info: Some(self.info.into()),
             }),
             other_type => Err(CreateManipulateReq(other_type)),
+        }
+    }
+}
+
+impl TryFrom<DirectConnectionManipulate> for ManipulateEntity {
+    type Error = NihilityCommonError;
+
+    fn try_from(value: DirectConnectionManipulate) -> Result<Self, Self::Error> {
+        match value.connection_params {
+            None => Err(NihilityCommonError::CreateManipulateEntity),
+            Some(connection_params) => Ok(match value.info {
+                None => ManipulateEntity {
+                    info: ManipulateInfoEntity::default(),
+                    manipulate: ManipulateData::ConnectionParams(Box::new(ConnParams::from(
+                        connection_params,
+                    ))),
+                },
+                Some(info) => ManipulateEntity {
+                    info: info.into(),
+                    manipulate: ManipulateData::Simple,
+                },
+            }),
         }
     }
 }

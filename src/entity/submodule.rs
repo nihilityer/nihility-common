@@ -1,7 +1,9 @@
 use std::collections::HashMap;
 
 use crate::error::NihilityCommonError;
-use crate::submodule::{ReceiveType, SubmoduleHeartbeat, SubmoduleReq, SubmoduleType};
+use crate::submodule::{
+    ConnectionParams, ReceiveType, SubmoduleHeartbeat, SubmoduleReq, SubmoduleType,
+};
 
 #[derive(Debug)]
 pub enum ConnectionType {
@@ -28,11 +30,16 @@ pub enum OperateType {
 }
 
 #[derive(Debug)]
-pub struct SubmoduleInfo {
-    pub default_instruct: Vec<String>,
+pub struct ConnParams {
     pub connection_type: ConnectionType,
     pub client_type: ClientType,
     pub conn_params: HashMap<String, String>,
+}
+
+#[derive(Debug)]
+pub struct SubmoduleInfo {
+    pub default_instruct: Vec<String>,
+    pub conn_params: ConnParams,
 }
 
 #[derive(Debug)]
@@ -63,19 +70,46 @@ impl From<ReceiveType> for ClientType {
     }
 }
 
-impl From<SubmoduleReq> for ModuleOperate {
-    fn from(value: SubmoduleReq) -> Self {
+impl From<ConnectionParams> for ConnParams {
+    fn from(value: ConnectionParams) -> Self {
         let connection_type = ConnectionType::from(value.submodule_type());
         let client_type = ClientType::from(value.receive_type());
-        ModuleOperate {
-            name: value.name,
-            info: Some(SubmoduleInfo {
-                default_instruct: value.default_instruct,
-                connection_type,
-                client_type,
-                conn_params: value.conn_params,
-            }),
-            operate_type: OperateType::Undefined,
+        ConnParams {
+            connection_type,
+            client_type,
+            conn_params: value.conn_params,
+        }
+    }
+}
+
+impl From<ConnParams> for ConnectionParams {
+    fn from(value: ConnParams) -> Self {
+        ConnectionParams {
+            submodule_type: SubmoduleType::from(value.connection_type).into(),
+            receive_type: ReceiveType::from(value.client_type).into(),
+            conn_params: value.conn_params,
+        }
+    }
+}
+
+impl TryFrom<SubmoduleReq> for ModuleOperate {
+    type Error = NihilityCommonError;
+
+    fn try_from(value: SubmoduleReq) -> Result<Self, Self::Error> {
+        match value.connection_params {
+            None => {
+                Err(NihilityCommonError::CreateSubmoduleReq)
+            }
+            Some(connection_params) => {
+                Ok(ModuleOperate {
+                    name: value.name,
+                    info: Some(SubmoduleInfo {
+                        default_instruct: value.default_instruct,
+                        conn_params: ConnParams::from(connection_params),
+                    }),
+                    operate_type: OperateType::Undefined,
+                })
+            }
         }
     }
 }
@@ -118,9 +152,7 @@ impl TryInto<SubmoduleReq> for ModuleOperate {
         if let Some(info) = self.info {
             Ok(SubmoduleReq {
                 name: self.name,
-                receive_type: ReceiveType::from(info.client_type).into(),
-                submodule_type: SubmoduleType::from(info.connection_type).into(),
-                conn_params: info.conn_params,
+                connection_params: Some(ConnectionParams::from(info.conn_params)),
                 default_instruct: info.default_instruct,
             })
         } else {

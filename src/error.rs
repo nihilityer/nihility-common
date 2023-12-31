@@ -13,6 +13,10 @@ pub enum NihilityCommonError {
     CreateManipulateReq(ManipulateData),
     #[error("This Module Operate Don't Have Info")]
     CreateSubmoduleReq,
+    #[error("This SubmoduleReq Don't Have ConnectionParams")]
+    CreateModuleOperate,
+    #[error("This DirectConnectionManipulate Don't Have ConnectionParams")]
+    CreateManipulateEntity,
     #[error("This Module Operate Is In Other Type, Please Create {0:?} Type Req")]
     CreateSubmoduleHeartbeat(OperateType),
     #[error("{0:?} Client Not Connected")]

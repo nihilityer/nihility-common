@@ -1,6 +1,7 @@
 syntax = "proto3";
 
-import public "response_code.proto";
+import "response_code.proto";
+import "submodule.proto";
 
 package manipulate;
 
@@ -18,6 +19,7 @@ service Manipulate {
   rpc SendSimpleManipulate (SimpleManipulate) returns (response_code.Resp) {}
   rpc SendTextDisplayManipulate (TextDisplayManipulate) returns (response_code.Resp) {}
   rpc SendMultipleTextDisplayManipulate (stream TextDisplayManipulate) returns (stream response_code.Resp) {}
+  rpc SendDirectConnectionManipulate (DirectConnectionManipulate) returns (response_code.Resp) {}
 }
 
 message ManipulateInfo {
@@ -32,4 +34,9 @@ message SimpleManipulate {
 message TextDisplayManipulate {
   ManipulateInfo info = 1;
   string text = 2;
+}
+
+message DirectConnectionManipulate {
+  ManipulateInfo info = 1;
+  submodule.ConnectionParams connection_params = 2;
 }
