@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package response_code;
+
+enum RespCode {
+  UNKNOWN_ERROR = 0;
+  SUCCESS = 1;
+  UNABLE_TO_PROCESS = 2;
+  AUTHENTICATION_FAIL = 3;
+}
+
+message Resp {
+  RespCode code = 1;
+  bytes sign = 2;
+}

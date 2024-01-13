@@ -1,0 +1,28 @@
+syntax = "proto3";
+
+import "response_code.proto";
+
+package instruct;
+
+enum Type {
+  DEFAULT_TYPE = 0;
+  SPECIAL_TYPE = 1;
+  WAIT_NEXT_TYPE = 2;
+}
+
+service Instruct {
+  rpc SendTextInstruct (TextInstruct) returns (response_code.Resp) {}
+  rpc SendMultipleTextInstruct (stream TextInstruct) returns (stream response_code.Resp) {}
+}
+
+message InstructInfo {
+  string instruct_id = 1;
+  Type instruct_type = 2;
+  string receive_manipulate_submodule = 3;
+}
+
+message TextInstruct {
+  InstructInfo info = 1;
+  string instruct = 2;
+  bytes sign = 3;
+}
