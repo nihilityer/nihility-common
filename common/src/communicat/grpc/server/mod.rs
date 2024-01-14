@@ -13,11 +13,11 @@ use tracing::{error, info};
 use crate::communicat::grpc::config::GrpcServerConfig;
 use crate::communicat::grpc::server::instruct::InstructImpl;
 use crate::communicat::grpc::server::manipulate::ManipulateImpl;
-use crate::communicat::grpc::server::submodule::SubmoduleImpl;
+use crate::communicat::grpc::server::module_operate::SubmoduleImpl;
 use crate::communicat::NihilityServer;
 use crate::entity::instruct::InstructEntity;
 use crate::entity::manipulate::ManipulateEntity;
-use crate::entity::submodule::ModuleOperate;
+use crate::entity::module_operate::ModuleOperate;
 use crate::error::WrapResult;
 use crate::instruct::instruct_server::InstructServer;
 use crate::manipulate::manipulate_server::ManipulateServer;
@@ -26,7 +26,7 @@ use crate::submodule::submodule_server::SubmoduleServer;
 
 mod instruct;
 mod manipulate;
-mod submodule;
+mod module_operate;
 
 type StreamResp = Pin<Box<dyn Stream<Item = Result<Resp, Status>> + Send>>;
 

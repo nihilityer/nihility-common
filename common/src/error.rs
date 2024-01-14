@@ -1,7 +1,7 @@
 use thiserror::Error;
 
 use crate::entity::manipulate::ManipulateData;
-use crate::entity::submodule::OperateType;
+use crate::entity::module_operate::OperateType;
 
 pub type WrapResult<T> = Result<T, NihilityCommonError>;
 

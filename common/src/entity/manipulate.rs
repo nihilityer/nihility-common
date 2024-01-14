@@ -3,7 +3,7 @@ use uuid::Uuid;
 
 use nihility_procmacro::Sign;
 
-use crate::entity::submodule::ConnParams;
+use crate::entity::module_operate::ConnParams;
 use crate::error::NihilityCommonError;
 use crate::error::NihilityCommonError::CreateManipulateReq;
 use crate::manipulate::{

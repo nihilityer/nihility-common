@@ -2,13 +2,14 @@ use tokio::sync::mpsc::UnboundedSender;
 use tonic::{Code, Request, Response, Status};
 use tracing::error;
 
+use crate::entity::module_operate::{ModuleOperate, OperateType};
 use crate::entity::response::ResponseEntity;
-use crate::entity::submodule::{ModuleOperate, OperateType};
 use crate::response_code::Resp;
 use crate::submodule::submodule_server::Submodule;
 use crate::submodule::{SubmoduleHeartbeat, SubmoduleReq};
 use crate::utils::auth::{
-    get_public_key, signature, verify, Signature, AUTHENTICATION_ERROR_MESSAGE,
+    get_public_key, set_module_operate_register_info, signature, verify, Signature,
+    AUTHENTICATION_ERROR_MESSAGE,
 };
 
 #[derive(Clone)]
@@ -27,31 +28,37 @@ impl SubmoduleImpl {
 #[tonic::async_trait]
 impl Submodule for SubmoduleImpl {
     async fn register(&self, request: Request<SubmoduleReq>) -> Result<Response<Resp>, Status> {
-        let mut buf = [0u8; 512];
+        let mut buf = [0u8; 1024];
         match ModuleOperate::try_from(request.into_inner()) {
             Ok(mut operate) => {
                 operate.operate_type = OperateType::Register;
                 if verify(&mut operate, &mut buf) {
-                    let auth_id = String::from_utf8_lossy(operate.get_sign()).to_string();
-                    match self.operate_module_sender.send(operate) {
-                        Ok(_) => match get_public_key(&auth_id) {
-                            Ok(public_key) => {
-                                let mut resp = ResponseEntity::default();
-                                signature(&mut resp, &auth_id, public_key, &mut buf)
-                                    .expect("Encode Entity Error");
-                                Ok(Response::new(Resp::from(resp)))
-                            }
+                    match set_module_operate_register_info(&mut operate).await {
+                        Ok(auth_id) => match self.operate_module_sender.send(operate) {
+                            Ok(_) => match get_public_key(&auth_id).await {
+                                Ok(public_key) => {
+                                    let mut resp = ResponseEntity::default();
+                                    signature(&mut resp, &auth_id, public_key, &mut buf)
+                                        .expect("Encode Entity Error");
+                                    Ok(Response::new(Resp::from(resp)))
+                                }
+                                Err(e) => {
+                                    error!("Submodule Server register Auth Id Error: {:?}", &e);
+                                    Err(Status::from_error(Box::new(e)))
+                                }
+                            },
                             Err(e) => {
-                                error!("Submodule Server register Auth Id Error: {:?}", &e);
+                                error!("Submodule Server register Send To Core Error: {:?}", &e);
                                 Err(Status::from_error(Box::new(e)))
                             }
                         },
                         Err(e) => {
-                            error!("Submodule Server register Auth Id Error: {:?}", &e);
+                            error!("Submodule Server register req Error: {:?}", &e);
                             Err(Status::from_error(Box::new(e)))
                         }
                     }
                 } else {
+                    error!("Submodule Server register Request Verify Error!");
                     Err(Status::new(Code::Ok, AUTHENTICATION_ERROR_MESSAGE))
                 }
             }
@@ -73,7 +80,7 @@ impl Submodule for SubmoduleImpl {
                 if verify(&mut operate, &mut buf) {
                     let auth_id = String::from_utf8_lossy(operate.get_sign()).to_string();
                     match self.operate_module_sender.send(operate) {
-                        Ok(_) => match get_public_key(&auth_id) {
+                        Ok(_) => match get_public_key(&auth_id).await {
                             Ok(public_key) => {
                                 let mut resp = ResponseEntity::default();
                                 signature(&mut resp, &auth_id, public_key, &mut buf)
@@ -86,11 +93,12 @@ impl Submodule for SubmoduleImpl {
                             }
                         },
                         Err(e) => {
-                            error!("Submodule Server offline Auth Id Error: {:?}", &e);
+                            error!("Submodule Server offline Send To Core Error: {:?}", &e);
                             Err(Status::from_error(Box::new(e)))
                         }
                     }
                 } else {
+                    error!("Submodule Server register Request Verify Error!");
                     Err(Status::new(Code::Ok, AUTHENTICATION_ERROR_MESSAGE))
                 }
             }
@@ -113,7 +121,7 @@ impl Submodule for SubmoduleImpl {
         if verify(&mut entity, &mut buf) {
             let auth_id = String::from_utf8_lossy(entity.get_sign()).to_string();
             match self.operate_module_sender.send(entity) {
-                Ok(_) => match get_public_key(&auth_id) {
+                Ok(_) => match get_public_key(&auth_id).await {
                     Ok(public_key) => {
                         let mut resp = ResponseEntity::default();
                         signature(&mut resp, &auth_id, public_key, &mut buf)
@@ -126,11 +134,12 @@ impl Submodule for SubmoduleImpl {
                     }
                 },
                 Err(e) => {
-                    error!("Submodule Server heartbeat Auth Id Error: {:?}", &e);
+                    error!("Submodule Server heartbeat Send To Core Error: {:?}", &e);
                     Err(Status::from_error(Box::new(e)))
                 }
             }
         } else {
+            error!("Submodule Server register Request Verify Error!");
             Err(Status::new(Code::Ok, AUTHENTICATION_ERROR_MESSAGE))
         }
     }
@@ -143,7 +152,7 @@ impl Submodule for SubmoduleImpl {
                 if verify(&mut operate, &mut buf) {
                     let auth_id = String::from_utf8_lossy(operate.get_sign()).to_string();
                     match self.operate_module_sender.send(operate) {
-                        Ok(_) => match get_public_key(&auth_id) {
+                        Ok(_) => match get_public_key(&auth_id).await {
                             Ok(public_key) => {
                                 let mut resp = ResponseEntity::default();
                                 signature(&mut resp, &auth_id, public_key, &mut buf)
@@ -156,11 +165,12 @@ impl Submodule for SubmoduleImpl {
                             }
                         },
                         Err(e) => {
-                            error!("Submodule Server update Auth Id Error: {:?}", &e);
+                            error!("Submodule Server update Send To Core Error: {:?}", &e);
                             Err(Status::from_error(Box::new(e)))
                         }
                     }
                 } else {
+                    error!("Submodule Server register Request Verify Error!");
                     Err(Status::new(Code::Ok, AUTHENTICATION_ERROR_MESSAGE))
                 }
             }

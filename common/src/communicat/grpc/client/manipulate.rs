@@ -31,9 +31,13 @@ impl SendManipulateOperate for GrpcClient {
         mut manipulate: ManipulateEntity,
     ) -> WrapResult<ResponseEntity> {
         let mut buf = [0u8; 512];
-        let auth_id = String::from_utf8_lossy(&manipulate.get_sign()).to_string();
-        let public_key = get_public_key(&auth_id)?;
-        signature(&mut manipulate, &auth_id, public_key, &mut buf)?;
+        let auth_id = String::from_utf8_lossy(manipulate.get_sign()).to_string();
+        signature(
+            &mut manipulate,
+            &auth_id,
+            get_public_key(&auth_id).await?,
+            &mut buf,
+        )?;
         let mut resp = ResponseEntity::from(
             self.manipulate_client
                 .clone()
@@ -53,9 +57,13 @@ impl SendManipulateOperate for GrpcClient {
         mut manipulate: ManipulateEntity,
     ) -> WrapResult<ResponseEntity> {
         let mut buf = [0u8; 512];
-        let auth_id = String::from_utf8_lossy(&manipulate.get_sign()).to_string();
-        let public_key = get_public_key(&auth_id)?;
-        signature(&mut manipulate, &auth_id, public_key, &mut buf)?;
+        let auth_id = String::from_utf8_lossy(manipulate.get_sign()).to_string();
+        signature(
+            &mut manipulate,
+            &auth_id,
+            get_public_key(&auth_id).await?,
+            &mut buf,
+        )?;
         let mut resp = ResponseEntity::from(
             self.manipulate_client
                 .clone()
@@ -79,8 +87,8 @@ impl SendManipulateOperate for GrpcClient {
         spawn(async move {
             while let Some(mut manipulate) = manipulate_stream.recv().await {
                 let mut buf = [0u8; 512];
-                let auth_id = String::from_utf8_lossy(&manipulate.get_sign()).to_string();
-                match get_public_key(&auth_id) {
+                let auth_id = String::from_utf8_lossy(manipulate.get_sign()).to_string();
+                match get_public_key(&auth_id).await {
                     Ok(public_key) => {
                         signature(&mut manipulate, &auth_id, public_key, &mut buf)
                             .expect("Encode Entity Error");
@@ -131,14 +139,14 @@ impl SendManipulateOperate for GrpcClient {
                         match out_tx.send(entity).await {
                             Ok(_) => {}
                             Err(e) => {
-                                error!("Instruct Grpc Client send_multiple_text_display_manipulate Send To Core Error: {:?}", e);
+                                error!("Manipulate Grpc Client send_multiple_text_display_manipulate Send To Core Error: {:?}", e);
                                 break;
                             }
                         }
                     }
                     Err(status) => {
                         error!(
-                            "Instruct Grpc Client send_multiple_text_display_manipulate Send Error: {:?}",
+                            "Manipulate Grpc Client send_multiple_text_display_manipulate Send Error: {:?}",
                             &status
                         );
                         let mut resp = ResponseEntity::default();
@@ -146,7 +154,7 @@ impl SendManipulateOperate for GrpcClient {
                         match out_tx.send(resp).await {
                             Ok(_) => {}
                             Err(e) => {
-                                error!("Instruct Grpc Client send_multiple_text_display_manipulate Send To Core Error: {:?}", e);
+                                error!("Manipulate Grpc Client send_multiple_text_display_manipulate Send To Core Error: {:?}", e);
                                 break;
                             }
                         }
@@ -163,8 +171,12 @@ impl SendManipulateOperate for GrpcClient {
     ) -> WrapResult<ResponseEntity> {
         let mut buf = [0u8; 512];
         let auth_id = String::from_utf8_lossy(&manipulate.get_sign()).to_string();
-        let public_key = get_public_key(&auth_id)?;
-        signature(&mut manipulate, &auth_id, public_key, &mut buf)?;
+        signature(
+            &mut manipulate,
+            &auth_id,
+            get_public_key(&auth_id).await?,
+            &mut buf,
+        )?;
         let mut resp = ResponseEntity::from(
             self.manipulate_client
                 .clone()

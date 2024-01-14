@@ -1,52 +1,55 @@
 use std::collections::HashMap;
 use std::time::Duration;
 
+use rsa::pkcs8::{EncodePublicKey, LineEnding};
 use time::macros::format_description;
 use time::UtcOffset;
-use tokio::join;
 use tokio::sync::mpsc;
 use tracing::{info, Level};
 
 use nihility_common::{
-    set_entity_submodule_sign, ClientType, ConnParams, ConnectionType, GrpcClient,
-    GrpcClientConfig, InstructData, InstructEntity, ManipulateData, ManipulateEntity,
-    ModuleOperate, NihilityClient, OperateType, SubmoduleInfo,
+    set_entity_submodule_sign, submodule_authentication_core_init, ClientType, ConnParams,
+    ConnectionType, GrpcClient, GrpcClientConfig, InstructData, InstructEntity, ManipulateData,
+    ManipulateEntity, ModuleOperate, NihilityClient, OperateType, SubmoduleInfo,
+    SUBMODULE_PUBLIC_KEY,
 };
 
 #[tokio::test(flavor = "multi_thread", worker_threads = 4)]
 async fn test_client() {
     init_log();
     tokio::time::sleep(Duration::from_secs(3)).await;
-    join!(
-        test_grpc_submodule_operate_client(),
-        test_grpc_instruct_client(),
-        test_grpc_manipulate_client()
-    );
+    test_grpc_submodule_operate_client().await;
+    test_grpc_instruct_client().await;
+    test_grpc_manipulate_client().await;
     tokio::time::sleep(Duration::from_secs(15)).await;
 }
 
 async fn test_grpc_submodule_operate_client() {
     info!("Sleep, Wait Server Start");
-    tokio::time::sleep(Duration::from_secs(5)).await;
     let config = GrpcClientConfig::default();
     let mut client = GrpcClient::init(config);
     client.connection_submodule_operate_server().await.unwrap();
     info!("Connection Success!");
     let mut operate = ModuleOperate::default();
     operate.name = String::from("test");
+    let mut config_map = HashMap::new();
+    config_map.insert(
+        SUBMODULE_PUBLIC_KEY.to_string(),
+        submodule_authentication_core_init(String::from("test"), "./auth/public.pem")
+            .unwrap()
+            .to_public_key_pem(LineEnding::default())
+            .unwrap(),
+    );
     operate.info = Some(SubmoduleInfo {
         default_instruct: vec![String::from("test_instruct")],
         conn_params: ConnParams {
             connection_type: ConnectionType::GrpcType,
             client_type: ClientType::NotReceiveType,
-            conn_params: HashMap::new(),
+            conn_params: config_map,
         },
     });
     operate.operate_type = OperateType::Register;
-    client
-        .register(set_entity_submodule_sign(operate))
-        .await
-        .unwrap();
+    client.register(operate).await.unwrap();
     info!("register finish");
     let mut operate = ModuleOperate::default();
     operate.name = String::from("test");
@@ -66,14 +69,6 @@ async fn test_grpc_submodule_operate_client() {
     info!("update finish");
     let mut operate = ModuleOperate::default();
     operate.name = String::from("test");
-    operate.info = Some(SubmoduleInfo {
-        default_instruct: vec![String::from("test_instruct")],
-        conn_params: ConnParams {
-            connection_type: ConnectionType::GrpcType,
-            client_type: ClientType::NotReceiveType,
-            conn_params: HashMap::new(),
-        },
-    });
     operate.operate_type = OperateType::Heartbeat;
     client
         .heartbeat(set_entity_submodule_sign(operate))
@@ -100,7 +95,6 @@ async fn test_grpc_submodule_operate_client() {
 
 async fn test_grpc_instruct_client() {
     info!("Sleep, Wait Server Start");
-    tokio::time::sleep(Duration::from_secs(5)).await;
     let config = GrpcClientConfig::default();
     let mut client = GrpcClient::init(config);
     client.connection_instruct_server().await.unwrap();
@@ -122,7 +116,6 @@ async fn test_grpc_instruct_client() {
 
 async fn test_grpc_manipulate_client() {
     info!("Sleep, Wait Server Start");
-    tokio::time::sleep(Duration::from_secs(5)).await;
     let config = GrpcClientConfig::default();
     let mut client = GrpcClient::init(config);
     client.connection_manipulate_server().await.unwrap();
@@ -170,7 +163,7 @@ fn init_log() {
     );
     let subscriber = subscriber
         .with_file(false)
-        .with_max_level(Level::INFO)
+        .with_max_level(Level::DEBUG)
         .with_line_number(true)
         .with_thread_ids(true)
         .with_target(true)

@@ -40,7 +40,7 @@ impl Instruct for InstructImpl {
         if verify(&mut entity, &mut buf) {
             let auth_id = String::from_utf8_lossy(entity.get_sign()).to_string();
             match self.instruct_sender.send(entity) {
-                Ok(_) => match get_public_key(&auth_id) {
+                Ok(_) => match get_public_key(&auth_id).await {
                     Ok(public_key) => {
                         let mut resp = ResponseEntity::default();
                         signature(&mut resp, &auth_id, public_key, &mut buf)
@@ -88,7 +88,7 @@ impl Instruct for InstructImpl {
                             match instruct_sender.send(entity) {
                                 Ok(_) => {
                                     let mut resp = ResponseEntity::default();
-                                    match get_public_key(&auth_id) {
+                                    match get_public_key(&auth_id).await {
                                         Ok(public_key) => {
                                             signature(&mut resp, &auth_id, public_key, &mut buf)
                                                 .expect("Encode Entity Error");
@@ -120,7 +120,7 @@ impl Instruct for InstructImpl {
                                 }
                                 Err(e) => {
                                     error!("Manipulate Server send_multiple_text_display_manipulate Send To Core Error: {:?}", e);
-                                    match get_public_key(&auth_id) {
+                                    match get_public_key(&auth_id).await {
                                         Ok(public_key) => {
                                             let mut resp = ResponseEntity::default();
                                             resp.unknown_error();

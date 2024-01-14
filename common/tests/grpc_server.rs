@@ -9,13 +9,16 @@ use tokio::{join, spawn};
 use tokio_util::sync::CancellationToken;
 use tracing::{info, Level};
 
-use nihility_common::{GrpcClientConfig, GrpcServer, GrpcServerConfig, NihilityServer};
+use nihility_common::{
+    core_authentication_core_init, GrpcClientConfig, GrpcServer, GrpcServerConfig, NihilityServer,
+};
 
 #[tokio::test(flavor = "multi_thread", worker_threads = 4)]
 async fn test_server() {
     init_log();
+    core_authentication_core_init("./auth").unwrap();
     join!(test_grpc_server(),);
-    tokio::time::sleep(Duration::from_secs(15)).await;
+    tokio::time::sleep(Duration::from_secs(60)).await;
 }
 
 async fn test_grpc_server() {
@@ -60,7 +63,7 @@ fn init_log() {
     );
     let subscriber = subscriber
         .with_file(false)
-        .with_max_level(Level::INFO)
+        .with_max_level(Level::DEBUG)
         .with_line_number(true)
         .with_thread_ids(true)
         .with_target(true)

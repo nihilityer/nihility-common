@@ -32,7 +32,7 @@ impl Manipulate for ManipulateImpl {
         if verify(&mut entity, &mut buf) {
             let auth_id = String::from_utf8_lossy(entity.get_sign()).to_string();
             match self.manipulate_sender.send(entity) {
-                Ok(_) => match get_public_key(&auth_id) {
+                Ok(_) => match get_public_key(&auth_id).await {
                     Ok(public_key) => {
                         let mut resp = ResponseEntity::default();
                         signature(&mut resp, &auth_id, public_key, &mut buf)
@@ -69,7 +69,7 @@ impl Manipulate for ManipulateImpl {
         if verify(&mut entity, &mut buf) {
             let auth_id = String::from_utf8_lossy(entity.get_sign()).to_string();
             match self.manipulate_sender.send(entity) {
-                Ok(_) => match get_public_key(&auth_id) {
+                Ok(_) => match get_public_key(&auth_id).await {
                     Ok(public_key) => {
                         let mut resp = ResponseEntity::default();
                         signature(&mut resp, &auth_id, public_key, &mut buf)
@@ -117,7 +117,7 @@ impl Manipulate for ManipulateImpl {
                             match manipulate_sender.send(entity) {
                                 Ok(_) => {
                                     let mut resp = ResponseEntity::default();
-                                    match get_public_key(&auth_id) {
+                                    match get_public_key(&auth_id).await {
                                         Ok(public_key) => {
                                             signature(&mut resp, &auth_id, public_key, &mut buf)
                                                 .expect("Encode Entity Error");
@@ -149,7 +149,7 @@ impl Manipulate for ManipulateImpl {
                                 }
                                 Err(e) => {
                                     error!("Instruct Server send_multiple_text_instruct Send To Core Error: {:?}", e);
-                                    match get_public_key(&auth_id) {
+                                    match get_public_key(&auth_id).await {
                                         Ok(public_key) => {
                                             let mut resp = ResponseEntity::default();
                                             resp.unknown_error();
@@ -229,7 +229,7 @@ impl Manipulate for ManipulateImpl {
                 if verify(&mut entity, &mut buf) {
                     let auth_id = String::from_utf8_lossy(entity.get_sign()).to_string();
                     match self.manipulate_sender.send(entity) {
-                        Ok(_) => match get_public_key(&auth_id) {
+                        Ok(_) => match get_public_key(&auth_id).await {
                             Ok(public_key) => {
                                 let mut resp = ResponseEntity::default();
                                 signature(&mut resp, &auth_id, public_key, &mut buf)

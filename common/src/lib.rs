@@ -9,11 +9,14 @@ pub use entity::instruct::{InstructData, InstructEntity, InstructInfoEntity, Ins
 pub use entity::manipulate::{
     ManipulateData, ManipulateEntity, ManipulateInfoEntity, ManipulateType,
 };
-pub use entity::response::ResponseCode;
-pub use entity::submodule::{
+pub use entity::module_operate::{
     ClientType, ConnParams, ConnectionType, ModuleOperate, OperateType, SubmoduleInfo,
 };
-pub use utils::auth::{core_authentication_core_init, submodule_authentication_core_init, set_entity_submodule_sign};
+pub use entity::response::ResponseCode;
+pub use utils::auth::{
+    core_authentication_core_init, get_module_operate_register_info, set_entity_submodule_sign,
+    submodule_authentication_core_init, SUBMODULE_PUBLIC_KEY,
+};
 
 mod communicat;
 mod entity;

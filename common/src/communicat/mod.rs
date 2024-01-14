@@ -4,7 +4,7 @@ use tonic::async_trait;
 use crate::entity::instruct::InstructEntity;
 use crate::entity::manipulate::ManipulateEntity;
 use crate::entity::response::ResponseEntity;
-use crate::entity::submodule::ModuleOperate;
+use crate::entity::module_operate::ModuleOperate;
 use crate::error::{NihilityCommonError, WrapResult};
 
 pub mod grpc;
@@ -14,6 +14,9 @@ pub trait NihilityClient: SendManipulateOperate + SendInstructOperate + Submodul
     async fn connection_submodule_operate_server(&mut self) -> WrapResult<()>;
     async fn connection_instruct_server(&mut self) -> WrapResult<()>;
     async fn connection_manipulate_server(&mut self) -> WrapResult<()>;
+    fn disconnection_submodule_operate_server(&mut self) -> WrapResult<()>;
+    fn disconnection_instruct_server(&mut self) -> WrapResult<()>;
+    fn disconnection_manipulate_server(&mut self) -> WrapResult<()>;
     async fn register(&self, operate: ModuleOperate) -> WrapResult<ResponseEntity> {
         if self.is_submodule_operate_client_connected() {
             return self.send_register(operate).await;

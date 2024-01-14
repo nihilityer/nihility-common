@@ -10,11 +10,11 @@ use crate::submodule::submodule_client::SubmoduleClient;
 
 mod instruct;
 mod manipulate;
-mod submodule_operate;
+mod module_operate;
 
 pub struct GrpcClient {
     config: GrpcClientConfig,
-    submodule_operate_client: Option<SubmoduleClient<Channel>>,
+    module_operate_client: Option<SubmoduleClient<Channel>>,
     instruct_client: Option<InstructClient<Channel>>,
     manipulate_client: Option<ManipulateClient<Channel>>,
 }
@@ -23,7 +23,7 @@ impl GrpcClient {
     pub fn init(grpc_client_config: GrpcClientConfig) -> Self {
         GrpcClient {
             config: grpc_client_config,
-            submodule_operate_client: None,
+            module_operate_client: None,
             instruct_client: None,
             manipulate_client: None,
         }
@@ -33,7 +33,7 @@ impl GrpcClient {
 #[async_trait]
 impl NihilityClient for GrpcClient {
     async fn connection_submodule_operate_server(&mut self) -> WrapResult<()> {
-        self.submodule_operate_client =
+        self.module_operate_client =
             Some(SubmoduleClient::connect(self.config.server_address.to_string()).await?);
         Ok(())
     }
@@ -47,6 +47,21 @@ impl NihilityClient for GrpcClient {
     async fn connection_manipulate_server(&mut self) -> WrapResult<()> {
         self.manipulate_client =
             Some(ManipulateClient::connect(self.config.server_address.to_string()).await?);
+        Ok(())
+    }
+
+    fn disconnection_submodule_operate_server(&mut self) -> WrapResult<()> {
+        self.module_operate_client = None;
+        Ok(())
+    }
+
+    fn disconnection_instruct_server(&mut self) -> WrapResult<()> {
+        self.instruct_client = None;
+        Ok(())
+    }
+
+    fn disconnection_manipulate_server(&mut self) -> WrapResult<()> {
+        self.manipulate_client = None;
         Ok(())
     }
 }

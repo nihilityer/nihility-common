@@ -29,9 +29,13 @@ impl SendInstructOperate for GrpcClient {
 
     async fn send_text_instruct(&self, mut instruct: InstructEntity) -> WrapResult<ResponseEntity> {
         let mut buf = [0u8; 512];
-        let auth_id = String::from_utf8_lossy(&instruct.get_sign()).to_string();
-        let public_key = get_public_key(&auth_id)?;
-        signature(&mut instruct, &auth_id, public_key, &mut buf)?;
+        let auth_id = String::from_utf8_lossy(instruct.get_sign()).to_string();
+        signature(
+            &mut instruct,
+            &auth_id,
+            get_public_key(&auth_id).await?,
+            &mut buf,
+        )?;
         let mut resp = ResponseEntity::from(
             self.instruct_client
                 .clone()
@@ -55,8 +59,8 @@ impl SendInstructOperate for GrpcClient {
         spawn(async move {
             let mut buf = [0u8; 512];
             while let Some(mut instruct) = instruct_stream.recv().await {
-                let auth_id = String::from_utf8_lossy(&instruct.get_sign()).to_string();
-                match get_public_key(&auth_id) {
+                let auth_id = String::from_utf8_lossy(instruct.get_sign()).to_string();
+                match get_public_key(&auth_id).await {
                     Ok(public_key) => {
                         signature(&mut instruct, &auth_id, public_key, &mut buf)
                             .expect("Encode Entity Error");
