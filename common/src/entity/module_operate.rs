@@ -5,6 +5,7 @@ use serde::Serialize;
 use nihility_procmacro::Sign;
 
 use crate::error::NihilityCommonError;
+use crate::get_submodule_name;
 use crate::submodule::{
     ConnectionParams, ReceiveType, SubmoduleHeartbeat, SubmoduleReq, SubmoduleType,
 };
@@ -62,7 +63,7 @@ pub struct ModuleOperate {
 impl Default for ModuleOperate {
     fn default() -> Self {
         ModuleOperate {
-            name: String::default(),
+            name: get_submodule_name(),
             info: None,
             operate_type: OperateType::default(),
             sign: get_auth_id_bytes(),

@@ -42,36 +42,34 @@ async fn test_grpc_submodule_operate_client() {
         .await
         .unwrap();
     info!("register finish");
-    let mut operate = ModuleOperate::default();
-    operate.name = String::from("test");
-    operate.info = Some(SubmoduleInfo {
-        default_instruct: vec![String::from("test_instruct")],
-        conn_params: ConnParams {
-            connection_type: ConnectionType::GrpcType,
-            client_type: ClientType::NotReceiveType,
-            conn_config: HashMap::new(),
-        },
-    });
-    operate.operate_type = OperateType::Update;
-    client.update(operate).await.unwrap();
+    client
+        .update(SubmoduleInfo {
+            default_instruct: vec![String::from("test_instruct")],
+            conn_params: ConnParams {
+                connection_type: ConnectionType::GrpcType,
+                client_type: ClientType::NotReceiveType,
+                conn_config: HashMap::new(),
+            },
+        })
+        .await
+        .unwrap();
     info!("update finish");
     let mut operate = ModuleOperate::default();
     operate.name = String::from("test");
     operate.operate_type = OperateType::Heartbeat;
-    client.heartbeat(operate).await.unwrap();
+    client.heartbeat().await.unwrap();
     info!("heartbeat finish");
-    let mut operate = ModuleOperate::default();
-    operate.name = String::from("test");
-    operate.info = Some(SubmoduleInfo {
-        default_instruct: vec![String::from("test_instruct")],
-        conn_params: ConnParams {
-            connection_type: ConnectionType::GrpcType,
-            client_type: ClientType::NotReceiveType,
-            conn_config: HashMap::new(),
-        },
-    });
-    operate.operate_type = OperateType::Offline;
-    client.offline(operate).await.unwrap();
+    client
+        .offline(SubmoduleInfo {
+            default_instruct: vec![String::from("test_instruct")],
+            conn_params: ConnParams {
+                connection_type: ConnectionType::GrpcType,
+                client_type: ClientType::NotReceiveType,
+                conn_config: HashMap::new(),
+            },
+        })
+        .await
+        .unwrap();
     info!("heartbeat finish");
 }
 

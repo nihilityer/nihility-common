@@ -3,8 +3,8 @@ use tonic::async_trait;
 
 use crate::entity::instruct::InstructEntity;
 use crate::entity::manipulate::ManipulateEntity;
-use crate::entity::response::ResponseEntity;
 use crate::entity::module_operate::ModuleOperate;
+use crate::entity::response::ResponseEntity;
 use crate::error::{NihilityCommonError, WrapResult};
 use crate::SubmoduleInfo;
 
@@ -26,25 +26,25 @@ pub trait NihilityClient: SendManipulateOperate + SendInstructOperate + Submodul
             "Submodule Operate".to_string(),
         ))
     }
-    async fn heartbeat(&self, operate: ModuleOperate) -> WrapResult<ResponseEntity> {
+    async fn heartbeat(&self) -> WrapResult<ResponseEntity> {
         if self.is_submodule_operate_client_connected() {
-            return self.send_heartbeat(operate).await;
+            return self.send_heartbeat().await;
         }
         Err(NihilityCommonError::NotConnected(
             "Submodule Operate".to_string(),
         ))
     }
-    async fn offline(&self, operate: ModuleOperate) -> WrapResult<ResponseEntity> {
+    async fn offline(&self, submodule_info: SubmoduleInfo) -> WrapResult<ResponseEntity> {
         if self.is_submodule_operate_client_connected() {
-            return self.send_offline(operate).await;
+            return self.send_offline(submodule_info).await;
         }
         Err(NihilityCommonError::NotConnected(
             "Submodule Operate".to_string(),
         ))
     }
-    async fn update(&self, operate: ModuleOperate) -> WrapResult<ResponseEntity> {
+    async fn update(&self, submodule_info: SubmoduleInfo) -> WrapResult<ResponseEntity> {
         if self.is_submodule_operate_client_connected() {
-            return self.send_update(operate).await;
+            return self.send_update(submodule_info).await;
         }
         Err(NihilityCommonError::NotConnected(
             "Submodule Operate".to_string(),
@@ -126,9 +126,9 @@ pub trait NihilityServer {
 pub trait SubmoduleOperate {
     fn is_submodule_operate_client_connected(&self) -> bool;
     async fn send_register(&self, submodule_info: SubmoduleInfo) -> WrapResult<ResponseEntity>;
-    async fn send_heartbeat(&self, operate: ModuleOperate) -> WrapResult<ResponseEntity>;
-    async fn send_offline(&self, operate: ModuleOperate) -> WrapResult<ResponseEntity>;
-    async fn send_update(&self, operate: ModuleOperate) -> WrapResult<ResponseEntity>;
+    async fn send_heartbeat(&self) -> WrapResult<ResponseEntity>;
+    async fn send_offline(&self, submodule_info: SubmoduleInfo) -> WrapResult<ResponseEntity>;
+    async fn send_update(&self, submodule_info: SubmoduleInfo) -> WrapResult<ResponseEntity>;
 }
 
 #[async_trait]

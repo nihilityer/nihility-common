@@ -23,8 +23,6 @@ impl SubmoduleOperate for GrpcClient {
     async fn send_register(&self, mut submodule_info: SubmoduleInfo) -> WrapResult<ResponseEntity> {
         let mut buf = [0u8; 512];
         let mut operate = ModuleOperate::default();
-
-        operate.name = get_submodule_name();
         submodule_info.conn_params.conn_config.insert(
             SUBMODULE_PUBLIC_KEY.to_string(),
             submodule_authentication_core_init()?.to_public_key_pem(LineEnding::default())?,
@@ -52,9 +50,11 @@ impl SubmoduleOperate for GrpcClient {
         Ok(resp)
     }
 
-    async fn send_heartbeat(&self, mut operate: ModuleOperate) -> WrapResult<ResponseEntity> {
+    async fn send_heartbeat(&self) -> WrapResult<ResponseEntity> {
         let mut buf = [0u8; 512];
+        let mut operate = ModuleOperate::default();
         let auth_id = String::from_utf8_lossy(operate.get_sign()).to_string();
+        operate.operate_type = OperateType::Heartbeat;
         signature(
             &mut operate,
             &auth_id,
@@ -75,9 +75,12 @@ impl SubmoduleOperate for GrpcClient {
         Ok(resp)
     }
 
-    async fn send_offline(&self, mut operate: ModuleOperate) -> WrapResult<ResponseEntity> {
+    async fn send_offline(&self, submodule_info: SubmoduleInfo) -> WrapResult<ResponseEntity> {
         let mut buf = [0u8; 512];
+        let mut operate = ModuleOperate::default();
         let auth_id = String::from_utf8_lossy(operate.get_sign()).to_string();
+        operate.operate_type = OperateType::Offline;
+        operate.info = Some(submodule_info);
         signature(
             &mut operate,
             &auth_id,
@@ -98,8 +101,11 @@ impl SubmoduleOperate for GrpcClient {
         Ok(resp)
     }
 
-    async fn send_update(&self, mut operate: ModuleOperate) -> WrapResult<ResponseEntity> {
+    async fn send_update(&self, submodule_info: SubmoduleInfo) -> WrapResult<ResponseEntity> {
         let mut buf = [0u8; 512];
+        let mut operate = ModuleOperate::default();
+        operate.operate_type = OperateType::Update;
+        operate.info = Some(submodule_info);
         let auth_id = String::from_utf8_lossy(operate.get_sign()).to_string();
         signature(
             &mut operate,

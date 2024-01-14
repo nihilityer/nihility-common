@@ -167,7 +167,6 @@ pub fn signature<T: Signature>(
     public_key: RsaPublicKey,
     buf: &mut [u8],
 ) -> WrapResult<()> {
-    entity.set_sign(auth_id.as_bytes().into());
     entity.set_sign(
         public_key
             .encrypt(
