@@ -1,3 +1,5 @@
+use std::sync::OnceLock;
+
 pub use communicat::grpc::{
     client::GrpcClient,
     config::{GrpcClientConfig, GrpcServerConfig},
@@ -14,8 +16,7 @@ pub use entity::module_operate::{
 };
 pub use entity::response::ResponseCode;
 pub use utils::auth::{
-    core_authentication_core_init, get_module_operate_register_info, set_entity_submodule_sign,
-    submodule_authentication_core_init, SUBMODULE_PUBLIC_KEY,
+    core_authentication_core_init, set_core_public_key_path, submodule_authentication_core_init,
 };
 
 mod communicat;
@@ -37,4 +38,17 @@ pub(crate) mod submodule {
 
 pub(crate) mod response_code {
     tonic::include_proto!("response_code");
+}
+
+static SUBMODULE_NAME: OnceLock<String> = OnceLock::new();
+
+pub fn set_submodule_name(name: String) {
+    SUBMODULE_NAME.get_or_init(|| name);
+}
+
+pub fn get_submodule_name() -> String {
+    SUBMODULE_NAME
+        .get()
+        .expect("Submodule Name Not Init")
+        .to_string()
 }

@@ -5,7 +5,7 @@ use nihility_procmacro::Sign;
 
 use crate::error::NihilityCommonError;
 use crate::instruct::{InstructInfo, TextInstruct, Type};
-use crate::utils::auth::Signature;
+use crate::utils::auth::{get_auth_id_bytes, Signature};
 
 #[derive(Debug, Default, Serialize)]
 pub enum InstructType {
@@ -27,12 +27,21 @@ pub enum InstructData {
     Text(String),
 }
 
-/// 核心心模块内部传递的指令实体
-#[derive(Debug, Default, Serialize, Sign)]
+#[derive(Debug, Serialize, Sign)]
 pub struct InstructEntity {
     pub info: InstructInfoEntity,
     pub instruct: InstructData,
     sign: Vec<u8>,
+}
+
+impl Default for InstructEntity {
+    fn default() -> Self {
+        InstructEntity {
+            info: InstructInfoEntity::default(),
+            instruct: InstructData::default(),
+            sign: get_auth_id_bytes(),
+        }
+    }
 }
 
 impl From<Type> for InstructType {

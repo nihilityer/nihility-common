@@ -1,4 +1,5 @@
 use async_trait::async_trait;
+use rsa::pkcs8::{EncodePublicKey, LineEnding};
 use tonic::Request;
 
 use crate::communicat::SubmoduleOperate;
@@ -6,7 +7,8 @@ use crate::entity::module_operate::ModuleOperate;
 use crate::entity::response::ResponseEntity;
 use crate::error::WrapResult;
 use crate::utils::auth::submodule_resister_success;
-use crate::utils::auth::{get_public_key, signature, verify, Signature};
+use crate::utils::auth::{get_public_key, signature, verify, Signature, SUBMODULE_PUBLIC_KEY};
+use crate::{get_submodule_name, submodule_authentication_core_init, OperateType, SubmoduleInfo};
 
 use super::GrpcClient;
 
@@ -18,13 +20,21 @@ impl SubmoduleOperate for GrpcClient {
         }
         true
     }
-    async fn send_register(&self, mut operate: ModuleOperate) -> WrapResult<ResponseEntity> {
+    async fn send_register(&self, mut submodule_info: SubmoduleInfo) -> WrapResult<ResponseEntity> {
         let mut buf = [0u8; 512];
-        let auth_id = operate.name.to_string();
+        let mut operate = ModuleOperate::default();
+
+        operate.name = get_submodule_name();
+        submodule_info.conn_params.conn_config.insert(
+            SUBMODULE_PUBLIC_KEY.to_string(),
+            submodule_authentication_core_init()?.to_public_key_pem(LineEnding::default())?,
+        );
+        operate.info = Some(submodule_info);
+        operate.operate_type = OperateType::Register;
         signature(
             &mut operate,
-            &auth_id,
-            get_public_key(&auth_id).await?,
+            &get_submodule_name(),
+            get_public_key(&get_submodule_name()).await?,
             &mut buf,
         )?;
         let mut resp = ResponseEntity::from(

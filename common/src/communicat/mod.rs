@@ -6,6 +6,7 @@ use crate::entity::manipulate::ManipulateEntity;
 use crate::entity::response::ResponseEntity;
 use crate::entity::module_operate::ModuleOperate;
 use crate::error::{NihilityCommonError, WrapResult};
+use crate::SubmoduleInfo;
 
 pub mod grpc;
 
@@ -17,9 +18,9 @@ pub trait NihilityClient: SendManipulateOperate + SendInstructOperate + Submodul
     fn disconnection_submodule_operate_server(&mut self) -> WrapResult<()>;
     fn disconnection_instruct_server(&mut self) -> WrapResult<()>;
     fn disconnection_manipulate_server(&mut self) -> WrapResult<()>;
-    async fn register(&self, operate: ModuleOperate) -> WrapResult<ResponseEntity> {
+    async fn register(&self, submodule_info: SubmoduleInfo) -> WrapResult<ResponseEntity> {
         if self.is_submodule_operate_client_connected() {
-            return self.send_register(operate).await;
+            return self.send_register(submodule_info).await;
         }
         Err(NihilityCommonError::NotConnected(
             "Submodule Operate".to_string(),
@@ -124,7 +125,7 @@ pub trait NihilityServer {
 #[async_trait]
 pub trait SubmoduleOperate {
     fn is_submodule_operate_client_connected(&self) -> bool;
-    async fn send_register(&self, operate: ModuleOperate) -> WrapResult<ResponseEntity>;
+    async fn send_register(&self, submodule_info: SubmoduleInfo) -> WrapResult<ResponseEntity>;
     async fn send_heartbeat(&self, operate: ModuleOperate) -> WrapResult<ResponseEntity>;
     async fn send_offline(&self, operate: ModuleOperate) -> WrapResult<ResponseEntity>;
     async fn send_update(&self, operate: ModuleOperate) -> WrapResult<ResponseEntity>;

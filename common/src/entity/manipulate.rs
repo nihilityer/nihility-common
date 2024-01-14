@@ -10,7 +10,7 @@ use crate::manipulate::{
     DirectConnectionManipulate, ManipulateInfo, SimpleManipulate, TextDisplayManipulate, Type,
 };
 use crate::submodule::ConnectionParams;
-use crate::utils::auth::Signature;
+use crate::utils::auth::{get_auth_id_bytes, Signature};
 
 #[derive(Debug, Clone, Default, Serialize)]
 pub enum ManipulateType {
@@ -38,12 +38,21 @@ pub enum ManipulateData {
     ConnectionParams(ConnParams),
 }
 
-/// 核心模块内部传递的操作实体
-#[derive(Debug, Default, Serialize, Sign)]
+#[derive(Debug, Serialize, Sign)]
 pub struct ManipulateEntity {
     pub info: ManipulateInfoEntity,
     pub manipulate: ManipulateData,
     sign: Vec<u8>,
+}
+
+impl Default for ManipulateEntity {
+    fn default() -> Self {
+        ManipulateEntity {
+            info: ManipulateInfoEntity::default(),
+            manipulate: ManipulateData::default(),
+            sign: get_auth_id_bytes(),
+        }
+    }
 }
 
 impl From<Type> for ManipulateType {

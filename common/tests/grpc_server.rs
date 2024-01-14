@@ -18,7 +18,7 @@ async fn test_server() {
     init_log();
     core_authentication_core_init("./auth").unwrap();
     join!(test_grpc_server(),);
-    tokio::time::sleep(Duration::from_secs(60)).await;
+    tokio::time::sleep(Duration::from_secs(30)).await;
 }
 
 async fn test_grpc_server() {

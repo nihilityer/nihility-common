@@ -8,7 +8,7 @@ use crate::error::NihilityCommonError;
 use crate::submodule::{
     ConnectionParams, ReceiveType, SubmoduleHeartbeat, SubmoduleReq, SubmoduleType,
 };
-use crate::utils::auth::Signature;
+use crate::utils::auth::{get_auth_id_bytes, Signature};
 
 #[derive(Debug, Default, Serialize)]
 pub enum ConnectionType {
@@ -42,7 +42,7 @@ pub enum OperateType {
 pub struct ConnParams {
     pub connection_type: ConnectionType,
     pub client_type: ClientType,
-    pub conn_params: HashMap<String, String>,
+    pub conn_config: HashMap<String, String>,
 }
 
 #[derive(Debug, Serialize)]
@@ -51,12 +51,23 @@ pub struct SubmoduleInfo {
     pub conn_params: ConnParams,
 }
 
-#[derive(Debug, Default, Serialize, Sign)]
+#[derive(Debug, Serialize, Sign)]
 pub struct ModuleOperate {
     pub name: String,
     pub info: Option<SubmoduleInfo>,
     pub operate_type: OperateType,
     sign: Vec<u8>,
+}
+
+impl Default for ModuleOperate {
+    fn default() -> Self {
+        ModuleOperate {
+            name: String::default(),
+            info: None,
+            operate_type: OperateType::default(),
+            sign: get_auth_id_bytes(),
+        }
+    }
 }
 
 impl From<SubmoduleType> for ConnectionType {
@@ -88,7 +99,7 @@ impl From<ConnectionParams> for ConnParams {
         ConnParams {
             connection_type,
             client_type,
-            conn_params: value.conn_params,
+            conn_config: value.conn_params,
         }
     }
 }
@@ -98,7 +109,7 @@ impl From<ConnParams> for ConnectionParams {
         ConnectionParams {
             submodule_type: SubmoduleType::from(value.connection_type).into(),
             receive_type: ReceiveType::from(value.client_type).into(),
-            conn_params: value.conn_params,
+            conn_params: value.conn_config,
         }
     }
 }
