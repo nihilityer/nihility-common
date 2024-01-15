@@ -33,6 +33,9 @@ impl ResponseEntity {
     pub fn authentication_fail(&mut self) {
         self.code = ResponseCode::AuthenticationFail;
     }
+    pub fn code(&self) -> &ResponseCode {
+        &self.code
+    }
 }
 
 impl From<RespCode> for ResponseCode {
