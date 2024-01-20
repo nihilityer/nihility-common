@@ -15,8 +15,11 @@ pub use entity::module_operate::{
     ClientType, ConnParams, ConnectionType, ModuleOperate, OperateType, SubmoduleInfo,
 };
 pub use entity::response::ResponseCode;
-pub use utils::auth::{
-    core_authentication_core_init, set_core_public_key_path, submodule_authentication_core_init,
+pub use utils::{
+    auth::{
+        core_authentication_core_init, set_core_public_key_path, submodule_authentication_core_init,
+    },
+    log::{Log, LogConfig, LogOutType},
 };
 
 mod communicat;

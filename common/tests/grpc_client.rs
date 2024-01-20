@@ -1,20 +1,18 @@
 use std::collections::HashMap;
 use std::time::Duration;
 
-use time::macros::format_description;
-use time::UtcOffset;
 use tokio::sync::mpsc;
-use tracing::{info, Level};
+use tracing::info;
 
 use nihility_common::{
     set_core_public_key_path, set_submodule_name, ClientType, ConnParams, ConnectionType,
-    GrpcClient, GrpcClientConfig, InstructData, InstructEntity, ManipulateData, ManipulateEntity,
-    ModuleOperate, NihilityClient, OperateType, SubmoduleInfo,
+    GrpcClient, GrpcClientConfig, InstructData, InstructEntity, Log, LogConfig, ManipulateData,
+    ManipulateEntity, ModuleOperate, NihilityClient, OperateType, SubmoduleInfo,
 };
 
 #[tokio::test(flavor = "multi_thread", worker_threads = 4)]
 async fn test_client() {
-    init_log();
+    Log::init(&vec![LogConfig::default()]).unwrap();
     tokio::time::sleep(Duration::from_secs(3)).await;
     set_submodule_name(String::from("test"));
     set_core_public_key_path(String::from("./auth/id_rsa.pub"));
@@ -122,22 +120,4 @@ async fn test_grpc_manipulate_client() {
         .await
         .unwrap();
     info!("direct_connection_manipulate finish");
-}
-
-fn init_log() {
-    let subscriber = tracing_subscriber::fmt().compact();
-    let timer = tracing_subscriber::fmt::time::OffsetTime::new(
-        UtcOffset::from_hms(8, 0, 0).unwrap(),
-        format_description!("[year]-[month]-[day] [hour]:[minute]:[second].[subsecond digits:3]"),
-    );
-    let subscriber = subscriber
-        .with_file(false)
-        .with_max_level(Level::DEBUG)
-        .with_line_number(true)
-        .with_thread_ids(true)
-        .with_target(true)
-        .with_timer(timer)
-        .finish();
-    tracing::subscriber::set_global_default(subscriber).unwrap();
-    tracing::debug!("log subscriber init success");
 }

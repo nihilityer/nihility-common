@@ -2,20 +2,19 @@ use std::net::IpAddr;
 use std::str::FromStr;
 use std::time::Duration;
 
-use time::macros::format_description;
-use time::UtcOffset;
 use tokio::sync::mpsc;
 use tokio::{join, spawn};
 use tokio_util::sync::CancellationToken;
-use tracing::{info, Level};
+use tracing::info;
 
 use nihility_common::{
-    core_authentication_core_init, GrpcClientConfig, GrpcServer, GrpcServerConfig, NihilityServer,
+    core_authentication_core_init, GrpcClientConfig, GrpcServer, GrpcServerConfig, Log, LogConfig,
+    NihilityServer,
 };
 
 #[tokio::test(flavor = "multi_thread", worker_threads = 4)]
 async fn test_server() {
-    init_log();
+    Log::init(&vec![LogConfig::default()]).unwrap();
     core_authentication_core_init("./auth").unwrap();
     join!(test_grpc_server(),);
     tokio::time::sleep(Duration::from_secs(30)).await;
@@ -53,22 +52,4 @@ async fn test_grpc_server() {
             info!("Manipulate: {:?}", manipulate);
         }
     });
-}
-
-fn init_log() {
-    let subscriber = tracing_subscriber::fmt().compact();
-    let timer = tracing_subscriber::fmt::time::OffsetTime::new(
-        UtcOffset::from_hms(8, 0, 0).unwrap(),
-        format_description!("[year]-[month]-[day] [hour]:[minute]:[second].[subsecond digits:3]"),
-    );
-    let subscriber = subscriber
-        .with_file(false)
-        .with_max_level(Level::DEBUG)
-        .with_line_number(true)
-        .with_thread_ids(true)
-        .with_target(true)
-        .with_timer(timer)
-        .finish();
-    tracing::subscriber::set_global_default(subscriber).unwrap();
-    tracing::debug!("log subscriber init success");
 }

@@ -25,6 +25,8 @@ pub enum NihilityCommonError {
     NotConnected(String),
     #[error("Config Field Missing")]
     ConfigFieldMissing,
+    #[error("Log Config Error")]
+    LogConfig,
     #[error("Std IO Error: {0}")]
     IoError(#[from] std::io::Error),
     #[error("FromUtf8Error: {0}")]
