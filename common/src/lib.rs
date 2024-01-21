@@ -1,5 +1,7 @@
 use std::sync::OnceLock;
 
+use tracing::debug;
+
 pub use communicat::grpc::{
     client::GrpcClient,
     config::{GrpcClientConfig, GrpcServerConfig},
@@ -48,8 +50,11 @@ pub fn set_submodule_name(name: String) {
 }
 
 pub fn get_submodule_name() -> String {
-    SUBMODULE_NAME
-        .get()
-        .expect("Submodule Name Not Init")
-        .to_string()
+    match SUBMODULE_NAME.get() {
+        None => {
+            debug!("Submodule Name Not Init, If Core Use This, Ignore This Error Info");
+            String::new()
+        }
+        Some(name) => name.to_string(),
+    }
 }

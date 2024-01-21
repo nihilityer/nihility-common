@@ -13,7 +13,6 @@ const BIND_IP: &str = "127.0.0.1";
 const DEFAULT_TERMINAL_ADDR: &str = "http://127.0.0.1:5050";
 
 const SERVER_ADDR_FIELD: &str = "server_addr";
-const SUBMODULE_NAME_FIELD: &str = "submodule_name";
 
 /// Grpc相关配置
 #[derive(Deserialize, Serialize, Clone, Debug)]
