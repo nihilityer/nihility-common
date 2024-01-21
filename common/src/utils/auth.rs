@@ -109,6 +109,15 @@ pub async fn set_module_operate_register_info(
     }
 }
 
+pub fn get_auth_id<T: Signature>(entity: &T) -> WrapResult<String> {
+    Ok(String::from_utf8_lossy(entity.get_sign()).to_string())
+}
+
+pub fn set_auth_id<T: Signature>(auth_id: String, entity: &mut T) -> WrapResult<()> {
+    entity.set_sign(auth_id.as_bytes().into());
+    Ok(())
+}
+
 pub async fn remove_submodule_public_key(
     module_operate: &ModuleOperate,
 ) -> WrapResult<RsaPublicKey> {
