@@ -109,9 +109,12 @@ pub async fn set_module_operate_register_info(
     }
 }
 
-pub async fn remove_submodule_public_key(auth_id: &String) -> WrapResult<RsaPublicKey> {
+pub async fn remove_submodule_public_key(
+    module_operate: &ModuleOperate,
+) -> WrapResult<RsaPublicKey> {
+    let auth_id = String::from_utf8_lossy(module_operate.get_sign()).to_string();
     let mut map = PUBLIC_KEY_MAP.get().unwrap().lock().await;
-    match map.remove(auth_id) {
+    match map.remove(&auth_id) {
         None => Err(NihilityCommonError::AuthId),
         Some(public_key) => Ok(public_key),
     }
