@@ -6,9 +6,9 @@ use crate::communicat::SubmoduleOperate;
 use crate::entity::module_operate::ModuleOperate;
 use crate::entity::response::ResponseEntity;
 use crate::error::WrapResult;
-use crate::utils::auth::submodule_resister_success;
 use crate::utils::auth::{get_public_key, signature, verify, Signature, SUBMODULE_PUBLIC_KEY};
-use crate::{get_submodule_name, submodule_authentication_core_init, OperateType, SubmoduleInfo};
+use crate::utils::auth::{submodule_authentication_core_init, submodule_resister_success};
+use crate::{get_submodule_name, OperateType, SubmoduleInfo};
 
 use super::GrpcClient;
 

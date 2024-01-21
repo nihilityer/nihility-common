@@ -68,7 +68,7 @@ async fn test_grpc_submodule_operate_client() {
         })
         .await
         .unwrap();
-    info!("heartbeat finish");
+    info!("offline finish");
 }
 
 async fn test_grpc_instruct_client() {

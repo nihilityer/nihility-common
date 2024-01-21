@@ -11,7 +11,7 @@ use rsa::{
 use serde::Serialize;
 use sha2::{Digest, Sha256};
 use tokio::sync::Mutex;
-use tracing::debug;
+use tracing::{debug, info};
 use uuid::Uuid;
 
 use crate::entity::response::ResponseEntity;
@@ -62,10 +62,11 @@ pub fn core_authentication_core_init<P: AsRef<Path>>(key_dir: P) -> WrapResult<(
     let dir_path = key_dir.as_ref();
     let private_key_path = dir_path.join(CORE_PRIVATE_KEY_FILE_NAME);
     let public_key_path = dir_path.join(CORE_PUBLIC_KEY_FILE_NAME);
-    if dir_path.exists() {
+    if private_key_path.exists() && public_key_path.exists() {
         let private_key = RsaPrivateKey::read_pkcs8_pem_file(private_key_path)?;
         PRIVATE_KEY.get_or_init(|| private_key);
     } else {
+        info!("Private Key Or Public Key Not Exists, Create New Key");
         create_dir_all(dir_path)?;
         let private_key = PRIVATE_KEY.get_or_init(|| {
             let mut rng = rand::thread_rng();

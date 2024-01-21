@@ -15,7 +15,7 @@ use nihility_common::{
 #[tokio::test(flavor = "multi_thread", worker_threads = 4)]
 async fn test_server() {
     Log::init(&vec![LogConfig::default()]).unwrap();
-    core_authentication_core_init("./auth").unwrap();
+    core_authentication_core_init("").unwrap();
     join!(test_grpc_server(),);
     tokio::time::sleep(Duration::from_secs(30)).await;
 }

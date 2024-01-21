@@ -16,9 +16,7 @@ pub use entity::module_operate::{
 };
 pub use entity::response::ResponseCode;
 pub use utils::{
-    auth::{
-        core_authentication_core_init, set_core_public_key_path, submodule_authentication_core_init,
-    },
+    auth::{core_authentication_core_init, set_core_public_key_path},
     log::{Log, LogConfig, LogOutType},
 };
 
