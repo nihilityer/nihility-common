@@ -109,6 +109,14 @@ pub async fn set_module_operate_register_info(
     }
 }
 
+pub async fn remove_submodule_public_key(auth_id: &String) -> WrapResult<RsaPublicKey> {
+    let mut map = PUBLIC_KEY_MAP.get().unwrap().lock().await;
+    match map.remove(auth_id) {
+        None => Err(NihilityCommonError::AuthId),
+        Some(public_key) => Ok(public_key),
+    }
+}
+
 pub async fn submodule_resister_success(resp: &mut ResponseEntity) -> WrapResult<()> {
     let register_id = String::from_utf8_lossy(resp.get_sign()).to_string();
     debug!("Register Id: {}", &register_id);
