@@ -58,9 +58,8 @@ impl Default for GrpcClientConfig {
 }
 
 impl GrpcServerConfig {
-    pub fn create_connection_params(&self, submodule_name: &String) -> HashMap<String, String> {
+    pub fn create_connection_params(&self) -> HashMap<String, String> {
         let mut result = HashMap::<String, String>::new();
-        result.insert(SUBMODULE_NAME_FIELD.to_string(), submodule_name.to_string());
         let server_addr = match self.bind_ip {
             IpAddr::V4(ip) => format!("http://{}:{}", ip, self.bind_port),
             IpAddr::V6(ip) => format!("http://[{}]:{}", ip, self.bind_port),

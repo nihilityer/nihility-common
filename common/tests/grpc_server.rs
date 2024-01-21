@@ -23,7 +23,7 @@ async fn test_server() {
 async fn test_grpc_server() {
     let mut server_config = GrpcServerConfig::default();
     server_config.bind_ip = IpAddr::from_str("127.0.0.1").unwrap();
-    let connection_params = server_config.create_connection_params(&"test".to_string());
+    let connection_params = server_config.create_connection_params();
     info!("connection_params: {:?}", &connection_params);
     let client_config = GrpcClientConfig::try_from(connection_params.clone()).unwrap();
     info!("client_config: {:?}", &client_config);
