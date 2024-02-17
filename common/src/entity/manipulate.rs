@@ -45,11 +45,27 @@ pub struct ManipulateEntity {
     sign: Vec<u8>,
 }
 
-impl Default for ManipulateEntity {
-    fn default() -> Self {
+impl ManipulateEntity {
+    pub fn new_text(text: String) -> Self {
         ManipulateEntity {
             info: ManipulateInfoEntity::default(),
-            manipulate: ManipulateData::default(),
+            manipulate: ManipulateData::Text(text),
+            sign: get_auth_id_bytes(),
+        }
+    }
+
+    pub fn new_simple() -> Self {
+        ManipulateEntity {
+            info: ManipulateInfoEntity::default(),
+            manipulate: ManipulateData::Simple,
+            sign: get_auth_id_bytes(),
+        }
+    }
+
+    pub fn new_connection_params(conn_params: ConnParams) -> Self {
+        ManipulateEntity {
+            info: ManipulateInfoEntity::default(),
+            manipulate: ManipulateData::ConnectionParams(conn_params),
             sign: get_auth_id_bytes(),
         }
     }

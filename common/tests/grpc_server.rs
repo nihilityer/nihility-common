@@ -9,13 +9,15 @@ use tracing::info;
 
 use nihility_common::{
     core_authentication_core_init, GrpcClientConfig, GrpcServer, GrpcServerConfig, Log, LogConfig,
-    NihilityServer,
+    LogLevel, NihilityServer,
 };
 
 #[tokio::test(flavor = "multi_thread", worker_threads = 4)]
 async fn test_server() {
-    Log::init(&vec![LogConfig::default()]).unwrap();
-    core_authentication_core_init("").unwrap();
+    let mut log_config = LogConfig::default();
+    log_config.level = LogLevel::Debug;
+    Log::init(&vec![log_config]).unwrap();
+    core_authentication_core_init("auth").unwrap();
     join!(test_grpc_server(),);
     tokio::time::sleep(Duration::from_secs(30)).await;
 }

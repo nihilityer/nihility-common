@@ -16,7 +16,7 @@ use uuid::Uuid;
 
 use crate::entity::response::ResponseEntity;
 use crate::error::{NihilityCommonError, WrapResult};
-use crate::{get_submodule_name, ModuleOperate};
+use crate::{CORE_FLAG, get_submodule_name, ModuleOperate};
 
 static PRIVATE_KEY: OnceLock<RsaPrivateKey> = OnceLock::new();
 static PUBLIC_KEY_MAP: OnceLock<Mutex<HashMap<String, RsaPublicKey>>> = OnceLock::new();
@@ -34,11 +34,12 @@ pub trait Signature: Serialize {
     fn set_sign(&mut self, sign: Vec<u8>);
 }
 
-pub fn set_core_public_key_path(path: String) {
-    CORE_PUBLIC_KEY_PATH.get_or_init(|| path);
+pub fn set_core_public_key_path(path: &str) {
+    CORE_PUBLIC_KEY_PATH.get_or_init(|| path.to_string());
 }
 
 pub fn submodule_authentication_core_init() -> WrapResult<RsaPublicKey> {
+    CORE_FLAG.get_or_init(|| false);
     let core_public_key_path = match CORE_PUBLIC_KEY_PATH.get() {
         None => CORE_PUBLIC_KEY_FILE_NAME.to_string(),
         Some(core_public_key_path) => core_public_key_path.to_string(),
@@ -59,6 +60,7 @@ pub fn submodule_authentication_core_init() -> WrapResult<RsaPublicKey> {
 }
 
 pub fn core_authentication_core_init<P: AsRef<Path>>(key_dir: P) -> WrapResult<()> {
+    CORE_FLAG.get_or_init(|| true);
     let dir_path = key_dir.as_ref();
     let private_key_path = dir_path.join(CORE_PRIVATE_KEY_FILE_NAME);
     let public_key_path = dir_path.join(CORE_PUBLIC_KEY_FILE_NAME);

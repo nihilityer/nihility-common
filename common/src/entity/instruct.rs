@@ -4,6 +4,7 @@ use uuid::Uuid;
 use nihility_procmacro::Sign;
 
 use crate::error::NihilityCommonError;
+use crate::get_default_receiver_submodule;
 use crate::instruct::{InstructInfo, TextInstruct, Type};
 use crate::utils::auth::{get_auth_id_bytes, Signature};
 
@@ -34,11 +35,11 @@ pub struct InstructEntity {
     sign: Vec<u8>,
 }
 
-impl Default for InstructEntity {
-    fn default() -> Self {
+impl InstructEntity {
+    pub fn new_text(text: String) -> Self {
         InstructEntity {
             info: InstructInfoEntity::default(),
-            instruct: InstructData::default(),
+            instruct: InstructData::Text(text),
             sign: get_auth_id_bytes(),
         }
     }
@@ -69,7 +70,7 @@ impl Default for InstructInfoEntity {
         InstructInfoEntity {
             instruct_id: Uuid::new_v4().to_string(),
             instruct_type: InstructType::DefaultType,
-            receive_manipulate_submodule: String::default(),
+            receive_manipulate_submodule: get_default_receiver_submodule(),
         }
     }
 }

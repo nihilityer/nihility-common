@@ -1,6 +1,6 @@
 use std::sync::OnceLock;
 
-use tracing::debug;
+use tracing::error;
 
 pub use communicat::grpc::{
     client::GrpcClient,
@@ -22,7 +22,7 @@ pub use utils::{
         core_authentication_core_init, get_auth_id, remove_submodule_public_key, set_auth_id,
         set_core_public_key_path,
     },
-    log::{Log, LogConfig, LogOutType},
+    log::{Log, LogConfig, LogLevel, LogOutType},
 };
 
 mod communicat;
@@ -48,16 +48,44 @@ pub(crate) mod response_code {
 
 static SUBMODULE_NAME: OnceLock<String> = OnceLock::new();
 
-pub fn set_submodule_name(name: String) {
-    SUBMODULE_NAME.get_or_init(|| name);
+static DEFAULT_RECEIVER_SUBMODULE: OnceLock<String> = OnceLock::new();
+
+static CORE_FLAG: OnceLock<bool> = OnceLock::new();
+
+pub fn set_submodule_name(name: &str) {
+    SUBMODULE_NAME.get_or_init(|| name.to_string());
 }
 
-pub fn get_submodule_name() -> String {
+fn get_submodule_name() -> String {
     match SUBMODULE_NAME.get() {
         None => {
-            debug!("Submodule Name Not Init, If Core Use This, Ignore This Error Info");
+            match CORE_FLAG.get() {
+                Some(true) => {}
+                _ => {
+                    error!("Submodule Name Not Init!");
+                }
+            }
             String::new()
         }
         Some(name) => name.to_string(),
+    }
+}
+
+pub fn set_default_receiver_submodule(submodule_name: &str) {
+    DEFAULT_RECEIVER_SUBMODULE.get_or_init(|| submodule_name.to_string());
+}
+
+fn get_default_receiver_submodule() -> String {
+    match DEFAULT_RECEIVER_SUBMODULE.get() {
+        None => {
+            match CORE_FLAG.get() {
+                Some(true) => {}
+                _ => {
+                    error!("Default Receiver Submodule Name Not Init!");
+                }
+            }
+            String::new()
+        }
+        Some(submodule_name) => submodule_name.to_string(),
     }
 }
