@@ -23,6 +23,8 @@ pub enum NihilityCommonError {
     FileNotExist(String),
     #[error("{0:?} Client Not Connected: {0}")]
     NotConnected(String),
+    #[error("{0:?} Thread not started")]
+    ThreadNotStarted(String),
     #[error("Config Field Missing")]
     ConfigFieldMissing,
     #[error("Log Config Error")]

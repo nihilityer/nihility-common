@@ -1,5 +1,8 @@
+use std::time::Duration;
+
 use tokio::sync::mpsc::{Receiver, UnboundedSender};
 use tonic::async_trait;
+use tracing::debug;
 
 use crate::entity::instruct::InstructEntity;
 use crate::entity::manipulate::ManipulateEntity;
@@ -10,15 +13,19 @@ use crate::SubmoduleInfo;
 
 pub mod grpc;
 
+static HEARTBEAT_TIME: u64 = 30;
+
 #[async_trait]
-pub trait NihilityClient: SendManipulateOperate + SendInstructOperate + SubmoduleOperate {
+pub trait NihilityClient:
+    SendManipulateOperate + SendInstructOperate + SubmoduleOperate + Clone
+{
     async fn connection_submodule_operate_server(&mut self) -> WrapResult<()>;
     async fn connection_instruct_server(&mut self) -> WrapResult<()>;
     async fn connection_manipulate_server(&mut self) -> WrapResult<()>;
     fn disconnection_submodule_operate_server(&mut self) -> WrapResult<()>;
     fn disconnection_instruct_server(&mut self) -> WrapResult<()>;
     fn disconnection_manipulate_server(&mut self) -> WrapResult<()>;
-    async fn register(&self, submodule_info: SubmoduleInfo) -> WrapResult<ResponseEntity> {
+    async fn register(&mut self, submodule_info: SubmoduleInfo) -> WrapResult<ResponseEntity> {
         if self.is_submodule_operate_client_connected() {
             return self.send_register(submodule_info).await;
         }
@@ -34,7 +41,7 @@ pub trait NihilityClient: SendManipulateOperate + SendInstructOperate + Submodul
             "Submodule Operate".to_string(),
         ))
     }
-    async fn offline(&self, submodule_info: SubmoduleInfo) -> WrapResult<ResponseEntity> {
+    async fn offline(&mut self, submodule_info: SubmoduleInfo) -> WrapResult<ResponseEntity> {
         if self.is_submodule_operate_client_connected() {
             return self.send_offline(submodule_info).await;
         }
@@ -125,10 +132,12 @@ pub trait NihilityServer {
 #[async_trait]
 pub trait SubmoduleOperate {
     fn is_submodule_operate_client_connected(&self) -> bool;
-    async fn send_register(&self, submodule_info: SubmoduleInfo) -> WrapResult<ResponseEntity>;
+    async fn send_register(&mut self, submodule_info: SubmoduleInfo) -> WrapResult<ResponseEntity>;
     async fn send_heartbeat(&self) -> WrapResult<ResponseEntity>;
-    async fn send_offline(&self, submodule_info: SubmoduleInfo) -> WrapResult<ResponseEntity>;
+    async fn send_offline(&mut self, submodule_info: SubmoduleInfo) -> WrapResult<ResponseEntity>;
     async fn send_update(&self, submodule_info: SubmoduleInfo) -> WrapResult<ResponseEntity>;
+    async fn start_heartbeat_thread(&mut self) -> WrapResult<()>;
+    async fn stop_heartbeat_thread(&mut self) -> WrapResult<()>;
 }
 
 #[async_trait]
@@ -160,4 +169,13 @@ pub trait SendManipulateOperate {
         &self,
         manipulate: ManipulateEntity,
     ) -> WrapResult<ResponseEntity>;
+}
+
+async fn heartbeat_thread<C: NihilityClient + Send + Sync>(client: C) -> WrapResult<()> {
+    let mut interval = tokio::time::interval(Duration::from_secs(HEARTBEAT_TIME));
+    loop {
+        interval.tick().await;
+        debug!("NihilityClient Send Heartbeat");
+        client.heartbeat().await?;
+    }
 }

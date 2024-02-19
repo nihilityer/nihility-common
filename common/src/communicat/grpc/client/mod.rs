@@ -1,4 +1,5 @@
 use async_trait::async_trait;
+use tokio_util::sync::CancellationToken;
 use tonic::transport::Channel;
 
 use crate::communicat::grpc::config::GrpcClientConfig;
@@ -12,8 +13,10 @@ mod instruct;
 mod manipulate;
 mod module_operate;
 
+#[derive(Clone)]
 pub struct GrpcClient {
     config: GrpcClientConfig,
+    cancellation_token: Option<CancellationToken>,
     module_operate_client: Option<SubmoduleClient<Channel>>,
     instruct_client: Option<InstructClient<Channel>>,
     manipulate_client: Option<ManipulateClient<Channel>>,
@@ -23,6 +26,7 @@ impl GrpcClient {
     pub fn init(grpc_client_config: GrpcClientConfig) -> Self {
         GrpcClient {
             config: grpc_client_config,
+            cancellation_token: None,
             module_operate_client: None,
             instruct_client: None,
             manipulate_client: None,
