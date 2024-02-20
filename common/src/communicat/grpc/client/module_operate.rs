@@ -53,7 +53,6 @@ impl SubmoduleOperate for GrpcClient {
             resp.authentication_fail()
         }
         submodule_resister_success(&mut resp).await?;
-        self.start_heartbeat_thread().await?;
         Ok(resp)
     }
 
@@ -83,7 +82,6 @@ impl SubmoduleOperate for GrpcClient {
     }
 
     async fn send_offline(&mut self, submodule_info: SubmoduleInfo) -> WrapResult<ResponseEntity> {
-        self.stop_heartbeat_thread().await?;
         let mut buf = [0u8; 512];
         let mut operate = ModuleOperate::default();
         let auth_id = String::from_utf8_lossy(operate.get_sign()).to_string();

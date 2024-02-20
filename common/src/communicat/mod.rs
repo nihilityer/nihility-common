@@ -27,6 +27,7 @@ pub trait NihilityClient:
     fn disconnection_manipulate_server(&mut self) -> WrapResult<()>;
     async fn register(&mut self, submodule_info: SubmoduleInfo) -> WrapResult<ResponseEntity> {
         if self.is_submodule_operate_client_connected() {
+            self.start_heartbeat_thread().await?;
             return self.send_register(submodule_info).await;
         }
         Err(NihilityCommonError::NotConnected(
@@ -43,6 +44,7 @@ pub trait NihilityClient:
     }
     async fn offline(&mut self, submodule_info: SubmoduleInfo) -> WrapResult<ResponseEntity> {
         if self.is_submodule_operate_client_connected() {
+            self.stop_heartbeat_thread().await?;
             return self.send_offline(submodule_info).await;
         }
         Err(NihilityCommonError::NotConnected(
