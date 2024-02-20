@@ -1,3 +1,6 @@
+use std::fmt;
+use std::fmt::Formatter;
+
 use serde::Serialize;
 use uuid::Uuid;
 
@@ -38,7 +41,7 @@ pub enum ManipulateData {
     ConnectionParams(ConnParams),
 }
 
-#[derive(Debug, Serialize, Sign)]
+#[derive(Serialize, Sign)]
 pub struct ManipulateEntity {
     pub info: ManipulateInfoEntity,
     pub manipulate: ManipulateData,
@@ -68,6 +71,16 @@ impl ManipulateEntity {
             manipulate: ManipulateData::ConnectionParams(conn_params),
             sign: get_auth_id_bytes(),
         }
+    }
+}
+
+impl fmt::Debug for ManipulateEntity {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        write!(
+            f,
+            "Manipulate ( info: {:?}, manipulate: {:?} )",
+            self.info, self.manipulate,
+        )
     }
 }
 

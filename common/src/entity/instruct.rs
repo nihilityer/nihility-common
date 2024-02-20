@@ -1,3 +1,6 @@
+use std::fmt;
+use std::fmt::Formatter;
+
 use serde::Serialize;
 use uuid::Uuid;
 
@@ -28,7 +31,7 @@ pub enum InstructData {
     Text(String),
 }
 
-#[derive(Debug, Serialize, Sign)]
+#[derive(Serialize, Sign)]
 pub struct InstructEntity {
     pub info: InstructInfoEntity,
     pub instruct: InstructData,
@@ -42,6 +45,16 @@ impl InstructEntity {
             instruct: InstructData::Text(text),
             sign: get_auth_id_bytes(),
         }
+    }
+}
+
+impl fmt::Debug for InstructEntity {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        write!(
+            f,
+            "Instruct ( info: {:?}, instruct: {:?} )",
+            self.info, self.instruct,
+        )
     }
 }
 

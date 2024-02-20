@@ -1,4 +1,6 @@
 use std::collections::HashMap;
+use std::fmt;
+use std::fmt::Formatter;
 
 use serde::Serialize;
 
@@ -52,12 +54,22 @@ pub struct SubmoduleInfo {
     pub conn_params: ConnParams,
 }
 
-#[derive(Debug, Serialize, Sign)]
+#[derive(Serialize, Sign)]
 pub struct ModuleOperate {
     pub name: String,
     pub info: Option<SubmoduleInfo>,
     pub operate_type: OperateType,
     sign: Vec<u8>,
+}
+
+impl fmt::Debug for ModuleOperate {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        write!(
+            f,
+            "ModuleOperate ( name: {:?}, info: {:?}, operate_type: {:?} )",
+            self.name, self.info, self.operate_type
+        )
+    }
 }
 
 impl Default for ModuleOperate {

@@ -1,3 +1,6 @@
+use std::fmt;
+use std::fmt::Formatter;
+
 use serde::Serialize;
 
 use nihility_procmacro::Sign;
@@ -14,7 +17,7 @@ pub enum ResponseCode {
     AuthenticationFail,
 }
 
-#[derive(Debug, Default, Serialize, Sign)]
+#[derive(Default, Serialize, Sign)]
 pub struct ResponseEntity {
     code: ResponseCode,
     sign: Vec<u8>,
@@ -35,6 +38,12 @@ impl ResponseEntity {
     }
     pub fn code(&self) -> &ResponseCode {
         &self.code
+    }
+}
+
+impl fmt::Debug for ResponseEntity {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        write!(f, "Response ( code: {:?} )", self.code)
     }
 }
 
