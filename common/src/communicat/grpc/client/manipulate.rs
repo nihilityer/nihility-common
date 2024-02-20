@@ -21,10 +21,7 @@ const STREAM_BUFFER: usize = 12;
 #[async_trait]
 impl SendManipulateOperate for GrpcClient {
     fn is_manipulate_client_connected(&self) -> bool {
-        if self.manipulate_client.is_none() {
-            return false;
-        }
-        true
+        self.manipulate_client.is_some()
     }
     async fn send_simple_manipulate(
         &self,

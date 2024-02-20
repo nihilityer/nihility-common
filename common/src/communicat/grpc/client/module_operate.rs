@@ -18,10 +18,7 @@ use super::GrpcClient;
 #[async_trait]
 impl SubmoduleOperate for GrpcClient {
     fn is_submodule_operate_client_connected(&self) -> bool {
-        if self.module_operate_client.is_none() {
-            return false;
-        }
-        true
+        self.module_operate_client.is_some()
     }
     async fn send_register(
         &mut self,

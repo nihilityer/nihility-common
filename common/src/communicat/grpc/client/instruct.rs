@@ -21,10 +21,7 @@ const STREAM_BUFFER: usize = 12;
 #[async_trait]
 impl SendInstructOperate for GrpcClient {
     fn is_instruct_client_connected(&self) -> bool {
-        if self.instruct_client.is_none() {
-            return false;
-        }
-        true
+        self.instruct_client.is_some()
     }
 
     async fn send_text_instruct(&self, mut instruct: InstructEntity) -> WrapResult<ResponseEntity> {

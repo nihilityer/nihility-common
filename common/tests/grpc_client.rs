@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use std::sync::OnceLock;
 use std::time::Duration;
 
 use tokio::sync::mpsc;
@@ -9,6 +10,8 @@ use nihility_common::{
     ConnParams, ConnectionType, GrpcClient, GrpcClientConfig, InstructEntity, Log, LogConfig,
     ManipulateEntity, ModuleOperate, NihilityClient, OperateType, SubmoduleInfo,
 };
+
+static _CLIENT: OnceLock<Box<dyn NihilityClient + Send + Sync>> = OnceLock::new();
 
 #[tokio::test(flavor = "multi_thread", worker_threads = 4)]
 async fn test_client() {

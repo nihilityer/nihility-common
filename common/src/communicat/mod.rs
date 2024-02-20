@@ -16,9 +16,7 @@ pub mod grpc;
 static HEARTBEAT_TIME: u64 = 30;
 
 #[async_trait]
-pub trait NihilityClient:
-    SendManipulateOperate + SendInstructOperate + SubmoduleOperate + Clone
-{
+pub trait NihilityClient: SendManipulateOperate + SendInstructOperate + SubmoduleOperate {
     async fn connection_submodule_operate_server(&mut self) -> WrapResult<()>;
     async fn connection_instruct_server(&mut self) -> WrapResult<()>;
     async fn connection_manipulate_server(&mut self) -> WrapResult<()>;
