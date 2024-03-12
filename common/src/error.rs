@@ -19,6 +19,8 @@ pub enum NihilityCommonError {
     CreateSubmoduleHeartbeat(OperateType),
     #[error("Auth Id Not Exist")]
     AuthId,
+    #[error("Submodule Info Not Set")]
+    SubmoduleInfo,
     #[error("This File Not Exist: {0:?}")]
     FileNotExist(String),
     #[error("{0:?} Client Not Connected: {0}")]

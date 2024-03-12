@@ -4,10 +4,11 @@ use tonic::transport::Channel;
 
 use crate::communicat::grpc::config::GrpcClientConfig;
 use crate::communicat::NihilityClient;
-use crate::error::WrapResult;
+use crate::error::{NihilityCommonError, WrapResult};
 use crate::instruct::instruct_client::InstructClient;
 use crate::manipulate::manipulate_client::ManipulateClient;
 use crate::submodule::submodule_client::SubmoduleClient;
+use crate::SubmoduleInfo;
 
 mod instruct;
 mod manipulate;
@@ -15,6 +16,7 @@ mod module_operate;
 
 #[derive(Clone)]
 pub struct GrpcClient {
+    submodule_nfo: Option<SubmoduleInfo>,
     config: GrpcClientConfig,
     cancellation_token: Option<CancellationToken>,
     module_operate_client: Option<SubmoduleClient<Channel>>,
@@ -25,6 +27,7 @@ pub struct GrpcClient {
 impl GrpcClient {
     pub fn init(grpc_client_config: GrpcClientConfig) -> Self {
         GrpcClient {
+            submodule_nfo: None,
             config: grpc_client_config,
             cancellation_token: None,
             module_operate_client: None,
@@ -67,5 +70,17 @@ impl NihilityClient for GrpcClient {
     fn disconnection_manipulate_server(&mut self) -> WrapResult<()> {
         self.manipulate_client = None;
         Ok(())
+    }
+
+    fn set_submodule_info(&mut self, submodule_info: SubmoduleInfo) -> WrapResult<()> {
+        self.submodule_nfo = Some(submodule_info);
+        Ok(())
+    }
+
+    fn get_submodule_info(&self) -> WrapResult<SubmoduleInfo> {
+        match self.submodule_nfo.clone() {
+            None => Err(NihilityCommonError::SubmoduleInfo),
+            Some(info) => Ok(info),
+        }
     }
 }

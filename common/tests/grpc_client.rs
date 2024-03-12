@@ -30,22 +30,22 @@ async fn test_grpc_submodule_operate_client() {
     info!("Sleep, Wait Server Start");
     let config = GrpcClientConfig::default();
     let mut client = GrpcClient::init(config);
+    client
+        .set_submodule_info(SubmoduleInfo {
+            default_instruct: vec![String::from("test_instruct")],
+            conn_params: ConnParams {
+                connection_type: ConnectionType::GrpcType,
+                client_type: ClientType::NotReceiveType,
+                conn_config: HashMap::new(),
+            },
+        })
+        .unwrap();
     client.connection_submodule_operate_server().await.unwrap();
     info!("Connection Success!");
-    client
-        .register(SubmoduleInfo {
-            default_instruct: vec![String::from("test_instruct")],
-            conn_params: ConnParams {
-                connection_type: ConnectionType::GrpcType,
-                client_type: ClientType::NotReceiveType,
-                conn_config: HashMap::new(),
-            },
-        })
-        .await
-        .unwrap();
+    client.register().await.unwrap();
     info!("register finish");
     client
-        .update(SubmoduleInfo {
+        .set_submodule_info(SubmoduleInfo {
             default_instruct: vec![String::from("test_instruct")],
             conn_params: ConnParams {
                 connection_type: ConnectionType::GrpcType,
@@ -53,25 +53,15 @@ async fn test_grpc_submodule_operate_client() {
                 conn_config: HashMap::new(),
             },
         })
-        .await
         .unwrap();
+    client.update().await.unwrap();
     info!("update finish");
     let mut operate = ModuleOperate::default();
     operate.name = String::from("test");
     operate.operate_type = OperateType::Heartbeat;
     client.heartbeat().await.unwrap();
     info!("heartbeat finish");
-    client
-        .offline(SubmoduleInfo {
-            default_instruct: vec![String::from("test_instruct")],
-            conn_params: ConnParams {
-                connection_type: ConnectionType::GrpcType,
-                client_type: ClientType::NotReceiveType,
-                conn_config: HashMap::new(),
-            },
-        })
-        .await
-        .unwrap();
+    client.offline().await.unwrap();
     info!("offline finish");
 }
 

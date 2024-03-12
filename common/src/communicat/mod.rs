@@ -23,10 +23,12 @@ pub trait NihilityClient: SendManipulateOperate + SendInstructOperate + Submodul
     fn disconnection_submodule_operate_server(&mut self) -> WrapResult<()>;
     fn disconnection_instruct_server(&mut self) -> WrapResult<()>;
     fn disconnection_manipulate_server(&mut self) -> WrapResult<()>;
-    async fn register(&mut self, submodule_info: SubmoduleInfo) -> WrapResult<ResponseEntity> {
+    fn set_submodule_info(&mut self, submodule_info: SubmoduleInfo) -> WrapResult<()>;
+    fn get_submodule_info(&self) -> WrapResult<SubmoduleInfo>;
+    async fn register(&mut self) -> WrapResult<ResponseEntity> {
         if self.is_submodule_operate_client_connected() {
             self.start_heartbeat_thread().await?;
-            return self.send_register(submodule_info).await;
+            return self.send_register(self.get_submodule_info()?).await;
         }
         Err(NihilityCommonError::NotConnected(
             "Submodule Operate".to_string(),
@@ -40,18 +42,18 @@ pub trait NihilityClient: SendManipulateOperate + SendInstructOperate + Submodul
             "Submodule Operate".to_string(),
         ))
     }
-    async fn offline(&mut self, submodule_info: SubmoduleInfo) -> WrapResult<ResponseEntity> {
+    async fn offline(&mut self) -> WrapResult<ResponseEntity> {
         if self.is_submodule_operate_client_connected() {
             self.stop_heartbeat_thread().await?;
-            return self.send_offline(submodule_info).await;
+            return self.send_offline(self.get_submodule_info()?).await;
         }
         Err(NihilityCommonError::NotConnected(
             "Submodule Operate".to_string(),
         ))
     }
-    async fn update(&self, submodule_info: SubmoduleInfo) -> WrapResult<ResponseEntity> {
+    async fn update(&self) -> WrapResult<ResponseEntity> {
         if self.is_submodule_operate_client_connected() {
-            return self.send_update(submodule_info).await;
+            return self.send_update(self.get_submodule_info()?).await;
         }
         Err(NihilityCommonError::NotConnected(
             "Submodule Operate".to_string(),

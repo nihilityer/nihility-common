@@ -13,7 +13,7 @@ use crate::submodule::{
 };
 use crate::utils::auth::{get_auth_id_bytes, Signature};
 
-#[derive(Debug, Default, Serialize)]
+#[derive(Debug, Clone, Default, Serialize)]
 pub enum ConnectionType {
     #[default]
     GrpcType,
@@ -22,7 +22,7 @@ pub enum ConnectionType {
     HttpType,
 }
 
-#[derive(Debug, Default, Serialize)]
+#[derive(Debug, Clone, Default, Serialize)]
 pub enum ClientType {
     #[default]
     NotReceiveType,
@@ -31,7 +31,7 @@ pub enum ClientType {
     ManipulateType,
 }
 
-#[derive(Debug, Default, Serialize)]
+#[derive(Debug, Clone, Default, Serialize)]
 pub enum OperateType {
     #[default]
     Undefined,
@@ -41,14 +41,14 @@ pub enum OperateType {
     Update,
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Clone, Serialize)]
 pub struct ConnParams {
     pub connection_type: ConnectionType,
     pub client_type: ClientType,
     pub conn_config: HashMap<String, String>,
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Clone, Serialize)]
 pub struct SubmoduleInfo {
     pub default_instruct: Vec<String>,
     pub conn_params: ConnParams,
