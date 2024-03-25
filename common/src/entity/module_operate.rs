@@ -2,7 +2,7 @@ use std::collections::HashMap;
 use std::fmt;
 use std::fmt::Formatter;
 
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 
 use nihility_procmacro::Sign;
 
@@ -13,7 +13,7 @@ use crate::submodule::{
 };
 use crate::utils::auth::{get_auth_id_bytes, Signature};
 
-#[derive(Debug, Clone, Default, Serialize)]
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub enum ConnectionType {
     #[default]
     GrpcType,
@@ -22,7 +22,7 @@ pub enum ConnectionType {
     HttpType,
 }
 
-#[derive(Debug, Clone, Default, Serialize)]
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub enum ClientType {
     #[default]
     NotReceiveType,
@@ -41,14 +41,14 @@ pub enum OperateType {
     Update,
 }
 
-#[derive(Debug, Clone, Serialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ConnParams {
     pub connection_type: ConnectionType,
     pub client_type: ClientType,
     pub conn_config: HashMap<String, String>,
 }
 
-#[derive(Debug, Clone, Serialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct SubmoduleInfo {
     pub default_instruct: Vec<String>,
     pub conn_params: ConnParams,
